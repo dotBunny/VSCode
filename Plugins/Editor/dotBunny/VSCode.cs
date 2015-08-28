@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version: 
- *   1.6
+ *   1.6.1
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -285,7 +285,6 @@ namespace dotBunny.Unity
 				} else {
 					args = "--args -g \"" + completeFilepath + ":" + line.ToString () + "\" -r";
 				}
-
 				// call 'open'
 				CallVSCode (args);
 
@@ -357,6 +356,8 @@ namespace dotBunny.Unity
 		/// </summary>
 		static string ScrubProjectContent (string content)
 		{
+			if ( content.Length == 0 ) return "";
+			
 			// Make sure our reference framework is 2.0, still the base for Unity
 			if (content.IndexOf ("<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>") != -1) {
 				content = Regex.Replace (content, "<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>", "<TargetFrameworkVersion>v2.0</TargetFrameworkVersion>");
@@ -371,19 +372,20 @@ namespace dotBunny.Unity
 			string addedOptions = "";
 			int startLocation = -1;
 			int endLocation = -1;
+			int endLength = 0;
 
 			while (found) {
 				startLocation = -1;
 				endLocation = -1;
+				endLength = 0;
 				addedOptions = "";
 				startLocation = content.IndexOf ("<PropertyGroup", location);
 
 				if (startLocation != -1) {
 
 					endLocation = content.IndexOf ("</PropertyGroup>", startLocation);
-					if (endLocation != -1) {
-
-					}
+					endLength = (endLocation - startLocation);
+                   
 
 					if (endLocation == -1) {
 						found = false;
@@ -392,22 +394,18 @@ namespace dotBunny.Unity
 						found = true;
 						location = endLocation;
 					}
-
-					if (content.Substring (startLocation, endLocation).IndexOf ("<TargetPath>") == -1) {
+					
+					if (content.Substring (startLocation, endLength).IndexOf ("<TargetPath>") == -1) {
 						addedOptions += "\n\r\t" + targetPath + "\n\r";
-						;
 					}
 
-					if (content.Substring (startLocation, endLocation).IndexOf ("<LangVersion>") == -1) {
+					if (content.Substring (startLocation, endLength).IndexOf ("<LangVersion>") == -1) {
 						addedOptions += "\n\r\t" + langVersion + "\n\r";
-						;
 					}
 
 					if (!string.IsNullOrEmpty (addedOptions)) {
 						content = content.Substring (0, endLocation) + addedOptions + content.Substring (endLocation);
 					}
-
-
 				} else {
 					found = false;
 				}

@@ -4,13 +4,13 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version: 
- *   1.6.1
+ *   1.6.5
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
  */
 
-// TODO: Fix Windows support for getting the port for editing (not sure of it yet)
+// TODO: Currently VSCode will not debug mono on Windows -- need a solution.
 // TODO: Remove reliance on SimpleJSON - Unity 5.3 JSON serializer
 namespace dotBunny.Unity
 {
@@ -48,14 +48,22 @@ namespace dotBunny.Unity
 				EditorPrefs.SetBool ("VSCode_Enabled", value);
 			}
 		}
-
+		
+        /// <summary>
+		/// Quick reference to the VSCode settings folder
+		/// </summary>
+		static string LaunchFolder {
+			get {
+				return ProjectPath + System.IO.Path.DirectorySeparatorChar + ".settings";
+			}
+		}
+        
 		/// <summary>
 		/// Quick reference to the VSCode launch settings file
 		/// </summary>
 		static string LaunchPath {
 			get {
-				return ProjectPath + System.IO.Path.DirectorySeparatorChar +
-				".settings" + System.IO.Path.DirectorySeparatorChar + "launch.json";
+				return LaunchFolder + System.IO.Path.DirectorySeparatorChar + "launch.json";
 			}
 		}
 
@@ -121,14 +129,17 @@ namespace dotBunny.Unity
 			System.Diagnostics.Process proc = new System.Diagnostics.Process ();
 
 			if (UnityEngine.Application.platform == UnityEngine.RuntimePlatform.WindowsEditor) {
+				UnityEngine.Debug.Log("code " + args);
 				proc.StartInfo.FileName = "code";
 				proc.StartInfo.Arguments = args;
+				proc.StartInfo.UseShellExecute = false;
+				
 			} else {
 				proc.StartInfo.FileName = "open";
-				proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" " + args;
+				proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
+				proc.StartInfo.UseShellExecute = false;
 			}
 
-			proc.StartInfo.UseShellExecute = false;
 			proc.StartInfo.RedirectStandardOutput = true;
 			proc.Start ();
 		}
@@ -191,16 +202,18 @@ namespace dotBunny.Unity
 				string[] tokens = Regex.Split (line, "\\s+");
 				if (tokens.Length > 4) {
 					string localAddress = Regex.Replace (tokens [2], @"\[(.*?)\]", "1.1.1.1");
-
-					var p = System.Diagnostics.Process.GetProcessById (System.Convert.ToInt16 (tokens [5]));
-					if (p != null) {
-						if (p.ProcessName == "Unity.exe") {
-							string cleanPort = localAddress.Split (':') [1];
-							if (int.TryParse (cleanPort, out port)) {
-								if (port > -1) {
-									return port;
-								}
+					
+					int test = -1;
+					int.TryParse(tokens[5], out test);
+					
+					if ( test > 1023 ) {
+						try {
+							var p = System.Diagnostics.Process.GetProcessById (test);
+							if (p.ProcessName == "Unity") {
+								return test;
 							}
+						} catch {
+							
 						}
 					}
 				}
@@ -232,7 +245,7 @@ namespace dotBunny.Unity
 		[MenuItem ("Assets/VS Code/Open Project", false, 100)]
 		static void MenuOpenProject ()
 		{
-			CallVSCode ("--args \"" + ProjectPath + "\" -r");
+			CallVSCode ("\"" + ProjectPath + "\" -r");
 		}
 
 		/// <summary>
@@ -281,9 +294,9 @@ namespace dotBunny.Unity
 
 				string args = null;
 				if (line == -1) {
-					args = "--args \"" + completeFilepath + "\" -r";
+					args = "\"" + completeFilepath + "\" -r";
 				} else {
-					args = "--args -g \"" + completeFilepath + ":" + line.ToString () + "\" -r";
+					args = "-g \"" + completeFilepath + ":" + line.ToString () + "\" -r";
 				}
 				// call 'open'
 				CallVSCode (args);
@@ -455,6 +468,10 @@ namespace dotBunny.Unity
 			defaultNode ["version"] = "0.1.0";
 			defaultNode ["configurations"] [-1] = defaultClass;
 
+			if (!Directory.Exists(VSCode.LaunchFolder)) {
+				System.IO.Directory.CreateDirectory(VSCode.LaunchFolder);
+			}
+			
 			if (!File.Exists (VSCode.LaunchPath)) {
 				File.WriteAllText (VSCode.LaunchPath, defaultNode.ToString ());
 			} else {

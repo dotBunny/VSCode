@@ -4,12 +4,13 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version: 
- *   1.6.5
+ *   1.6.6
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
  */
 
+// REQUIRES: VSCode 0.8.0 - Settings directory moved to .vscode
 // TODO: Currently VSCode will not debug mono on Windows -- need a solution.
 // TODO: Remove reliance on SimpleJSON - Unity 5.3 JSON serializer
 namespace dotBunny.Unity
@@ -54,7 +55,7 @@ namespace dotBunny.Unity
 		/// </summary>
 		static string LaunchFolder {
 			get {
-				return ProjectPath + System.IO.Path.DirectorySeparatorChar + ".settings";
+				return ProjectPath + System.IO.Path.DirectorySeparatorChar + ".vscode";
 			}
 		}
         

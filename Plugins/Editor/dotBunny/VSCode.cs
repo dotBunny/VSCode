@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version: 
- *   1.7
+ *   1.7.1
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -12,6 +12,7 @@
 // REQUIRES: VSCode 0.8.0 - Settings directory moved to .vscode
 // TODO: Currently VSCode will not debug mono on Windows -- need a solution.
 // TODO: Remove reliance on SimpleJSON - Unity 5.3 JSON serializer
+// TODO: Ignoring folders isnt working the way i want in the default workspace settings - talking with @code about iit.
 namespace dotBunny.Unity
 {
 	using System.IO;
@@ -525,11 +526,15 @@ namespace dotBunny.Unity
             exclusions["**/.git"].AsBool = true;
             
             // Project Related
+            exclusions["**/*.booproj"].AsBool = true;
             exclusions["**/*.csproj"].AsBool = true;
+            exclusions["**/*.pidb"].AsBool = true;
             exclusions["**/*.sln"].AsBool = true;
+            exclusions["**/*.suo"].AsBool = true;
+            exclusions["**/*.user"].AsBool = true;
             exclusions["**/*.userprefs"].AsBool = true;
             exclusions["**/*.unityproj"].AsBool = true;
-
+            
             // References
             exclusions["**/*.dll"].AsBool = true;
             exclusions["**/*.exe"].AsBool = true;
@@ -550,23 +555,37 @@ namespace dotBunny.Unity
             exclusions["**/*.wav"].AsBool = true;
 
             // Unity
-            exclusions["**/*.unity"].AsBool = true;
-            exclusions["**/*.prefab"].AsBool = true;
-            exclusions["**/*.meta"].AsBool = true;
+            exclusions["**/*.asset"].AsBool = true;
+            exclusions["**/*.cubemap"].AsBool = true;
             exclusions["**/*.flare"].AsBool = true;
             exclusions["**/*.mat"].AsBool = true;
+            exclusions["**/*.meta"].AsBool = true;
+            exclusions["**/*.*.meta"].AsBool = true;
+            exclusions["**/*.pidb.meta"].AsBool = true;
+            exclusions["**/*.prefab"].AsBool = true; 
+            exclusions["**/*.unity"].AsBool = true;
 
             // Models
             exclusions["**/*.3ds"].AsBool = true;
+            exclusions["**/*.3DS"].AsBool = true;
             exclusions["**/*.fbx"].AsBool = true;
+            exclusions["**/*.FBX"].AsBool = true;
             exclusions["**/*.lxo"].AsBool = true;
+            exclusions["**/*.LXO"].AsBool = true;
             exclusions["**/*.ma"].AsBool = true;
+            exclusions["**/*.MA"].AsBool = true;
             exclusions["**/*.obj"].AsBool = true;
+            exclusions["**/*.OBJ"].AsBool = true;
         
             // Folders
+            exclusions["build/"].AsBool = true;
+            exclusions["Build/"].AsBool = true;
+            exclusions["library/"].AsBool = true;
             exclusions["Library/"].AsBool = true;
             exclusions["obj/"].AsBool = true;
+            exclusions["Obj/"].AsBool = true;
             exclusions["ProjectSettings/"].AsBool = true;
+            exclusions["temp/"].AsBool = true;
             exclusions["Temp/"].AsBool = true;
             
             SimpleJSON.JSONClass file = new SimpleJSON.JSONClass ();

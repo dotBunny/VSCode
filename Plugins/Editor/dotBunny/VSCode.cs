@@ -4,12 +4,11 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version: 
- *   1.6.6
+ *   1.7
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
  */
-
 // REQUIRES: VSCode 0.8.0 - Settings directory moved to .vscode
 // TODO: Currently VSCode will not debug mono on Windows -- need a solution.
 // TODO: Remove reliance on SimpleJSON - Unity 5.3 JSON serializer
@@ -53,7 +52,7 @@ namespace dotBunny.Unity
         /// <summary>
 		/// Quick reference to the VSCode settings folder
 		/// </summary>
-		static string LaunchFolder {
+		static string SettingsFolder {
 			get {
 				return ProjectPath + System.IO.Path.DirectorySeparatorChar + ".vscode";
 			}
@@ -64,7 +63,7 @@ namespace dotBunny.Unity
 		/// </summary>
 		static string LaunchPath {
 			get {
-				return LaunchFolder + System.IO.Path.DirectorySeparatorChar + "launch.json";
+				return SettingsFolder + System.IO.Path.DirectorySeparatorChar + "launch.json";
 			}
 		}
 
@@ -76,6 +75,12 @@ namespace dotBunny.Unity
 				return System.IO.Path.GetDirectoryName (UnityEngine.Application.dataPath);
 			}
 		}
+        
+        static string SettingsPath {
+            get {
+                return SettingsFolder + System.IO.Path.DirectorySeparatorChar + "settings.json";
+            }
+        }
 
 		#endregion
 
@@ -199,11 +204,8 @@ namespace dotBunny.Unity
 			process.WaitForExit ();
             
 			foreach (string line in lines) {
-				int port = -1;
 				string[] tokens = Regex.Split (line, "\\s+");
 				if (tokens.Length > 4) {
-					string localAddress = Regex.Replace (tokens [2], @"\[(.*?)\]", "1.1.1.1");
-					
 					int test = -1;
 					int.TryParse(tokens[5], out test);
 					
@@ -222,10 +224,10 @@ namespace dotBunny.Unity
 			return -1;
 		}
 
-		[MenuItem ("Assets/VS Code/Enable Debug")]
+		[MenuItem ("Assets/VS Code/Enable Logging")]
 		static void MenuEnableDebug ()
 		{
-			Menu.SetChecked ("Assets/VS Code/Enable Debug", !Debug);
+			Menu.SetChecked ("Assets/VS Code/Enable Logging", !Debug);
 			Debug = !Debug;
 		}
 
@@ -235,8 +237,8 @@ namespace dotBunny.Unity
 			Menu.SetChecked ("Assets/VS Code/Enable Integration", !Enabled);
 			Enabled = !Enabled;
 		}
-
-		[MenuItem ("Assets/VS Code/Force Sync Project #%v", false, 201)]
+        
+		[MenuItem ("Assets/VS Code/Force Sync Project", false, 201)]
 		public static void MenuForceSyncProject ()
 		{
 			// Calling this will then trigger the callback as well;
@@ -252,10 +254,10 @@ namespace dotBunny.Unity
 		/// <summary>
 		/// Update "Enable Debug" menu item
 		/// </summary>
-		[MenuItem ("Assets/VS Code/Enable Debug", true, 301)]
+		[MenuItem ("Assets/VS Code/Enable Logging", true, 301)]
 		static bool MenuValidateMenuEnableDebug ()
 		{
-			Menu.SetChecked ("Assets/VS Code/Enable Debug", Debug);
+			Menu.SetChecked ("Assets/VS Code/Enable Logging", Debug);
 			return true;
 		}
 
@@ -269,6 +271,12 @@ namespace dotBunny.Unity
 			Menu.SetChecked ("Assets/VS Code/Enable Integration", Enabled);
 			return true;
 		}
+        
+        [MenuItem ("Assets/VS Code/Write Workspace Settings", false, 202)]
+        public static void MenuWriteWorkspaceSettings()
+        {
+            WriteWorkspaceSettings();
+        }
 
 		/// <summary>
 		/// Asset Open Callback (from Unity)
@@ -450,7 +458,7 @@ namespace dotBunny.Unity
 		}
 
 		/// <summary>
-		/// Updte Visual Studio Code Launch file
+		/// Update Visual Studio Code Launch file
 		/// </summary>
 		static void UpdateLaunchFile (int port)
 		{
@@ -469,8 +477,8 @@ namespace dotBunny.Unity
 			defaultNode ["version"] = "0.1.0";
 			defaultNode ["configurations"] [-1] = defaultClass;
 
-			if (!Directory.Exists(VSCode.LaunchFolder)) {
-				System.IO.Directory.CreateDirectory(VSCode.LaunchFolder);
+			if (!Directory.Exists(VSCode.SettingsFolder)) {
+				System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);
 			}
 			
 			if (!File.Exists (VSCode.LaunchPath)) {
@@ -504,6 +512,74 @@ namespace dotBunny.Unity
 				}
 			} 
 		}
+        
+        /// <summary>
+		/// Write Default Workspace Settings
+		/// </summary>
+        static void WriteWorkspaceSettings()
+        {
+            SimpleJSON.JSONClass exclusions = new SimpleJSON.JSONClass ();
+            
+            // Hidden
+            exclusions["**/.DS_Store"].AsBool = true;
+            exclusions["**/.git"].AsBool = true;
+            
+            // Project Related
+            exclusions["**/*.csproj"].AsBool = true;
+            exclusions["**/*.sln"].AsBool = true;
+            exclusions["**/*.userprefs"].AsBool = true;
+            exclusions["**/*.unityproj"].AsBool = true;
+
+            // References
+            exclusions["**/*.dll"].AsBool = true;
+            exclusions["**/*.exe"].AsBool = true;
+            
+            // Media
+            exclusions["**/*.gif"].AsBool = true;
+            exclusions["**/*.ico"].AsBool = true;
+            exclusions["**/*.jpg"].AsBool = true;
+            exclusions["**/*.jpeg"].AsBool = true;
+            exclusions["**/*.mid"].AsBool = true;
+            exclusions["**/*.midi"].AsBool = true;
+            exclusions["**/*.pdf"].AsBool = true;
+            exclusions["**/*.png"].AsBool = true;
+            exclusions["**/*.psd"].AsBool = true;
+            exclusions["**/*.tga"].AsBool = true;
+            exclusions["**/*.tif"].AsBool = true;
+            exclusions["**/*.tiff"].AsBool = true;
+            exclusions["**/*.wav"].AsBool = true;
+
+            // Unity
+            exclusions["**/*.unity"].AsBool = true;
+            exclusions["**/*.prefab"].AsBool = true;
+            exclusions["**/*.meta"].AsBool = true;
+            exclusions["**/*.flare"].AsBool = true;
+            exclusions["**/*.mat"].AsBool = true;
+
+            // Models
+            exclusions["**/*.3ds"].AsBool = true;
+            exclusions["**/*.fbx"].AsBool = true;
+            exclusions["**/*.lxo"].AsBool = true;
+            exclusions["**/*.ma"].AsBool = true;
+            exclusions["**/*.obj"].AsBool = true;
+        
+            // Folders
+            exclusions["Library/"].AsBool = true;
+            exclusions["obj/"].AsBool = true;
+            exclusions["ProjectSettings/"].AsBool = true;
+            exclusions["Temp/"].AsBool = true;
+            
+            SimpleJSON.JSONClass file = new SimpleJSON.JSONClass ();
+
+            file["files.exclude"] = exclusions;
+			
+            if (!Directory.Exists(VSCode.SettingsFolder)) {
+				System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);
+			}
+            
+            // Dont like the replace but it fixes the issue with the JSON
+            File.WriteAllText (VSCode.SettingsPath, file.ToString ().Replace("\"true\"", "true"));
+        }
 
 		#endregion
 	}

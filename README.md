@@ -10,3 +10,8 @@ It is important to make sure that the `VSCode.cs` file is placed under the `Asse
 Once the VSCode files are in place, simply navigate your way to the `Assets | VS Code` menu and select the `Enable Integration` option. A check mark will appear beside the option, indicating that its active.
 
 That's it! Your ready to go!
+
+## Platform Support
+I use the plugin every day on a Mac (so it's battle tested there), and occasionally test it on a Windows VM. As for the recently announced Linux support, it should work just like the Mac version. I'll get around to installing the Linux editor sometime in the near future.
+
+The Windows version of Visual Studio Code currently does not support debugging Mono, and will just throw a warning if you try to do it. The "Code" team is aware of this limitation, and we'll leave it at that.

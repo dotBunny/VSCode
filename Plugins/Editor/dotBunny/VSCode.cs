@@ -97,6 +97,18 @@ namespace dotBunny.Unity
 
         #endregion
 
+        /// <summary>
+        /// Fail safe integration constructor
+        /// </summary>
+        static VSCode()
+        {
+            if (Enabled)
+            {
+                UpdateUnityPreferences(true);
+            }
+        }
+        
+
         #region Public Members
 
         /// <summary>
@@ -263,82 +275,14 @@ namespace dotBunny.Unity
             Menu.SetChecked("Assets/VS Code/Enable Integration", !Enabled);
             Enabled = !Enabled;
 
-            if (Enabled)
-            {
-#if UNITY_EDITOR_OSX
-                var newPath =  "/Applications/Visual Studio Code.app";  
-#else
-                var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
-#endif
-
-                // App
-                if (EditorPrefs.GetString("kScriptsDefaultApp") != newPath)
+            UpdateUnityPreferences(Enabled);
+            
+             if ( VSCode.Debug ) {
+                if (Enabled)
                 {
-                    EditorPrefs.SetString("VSCode_PreviousApp", EditorPrefs.GetString("kScriptsDefaultApp"));
-                }
-                EditorPrefs.SetString("kScriptsDefaultApp", newPath);
-
-                // Arguments
-                if (EditorPrefs.GetString("kScriptEditorArgs") != "-r -g \"$(File):$(Line)\"")
-                {
-                    EditorPrefs.SetString("VSCode_PreviousArgs", EditorPrefs.GetString("kScriptEditorArgs"));
-                }
-
-                EditorPrefs.SetString("kScriptEditorArgs", "-r -g \"$(File):$(Line)\"");
-
-                // MonoDevelop Solution
-                if (EditorPrefs.GetBool("kMonoDevelopSolutionProperties", false))
-                {
-                    EditorPrefs.SetBool("VSCode_PreviousMD", true);
-                }
-                EditorPrefs.SetBool("kMonoDevelopSolutionProperties", false);
-
-                // Support Unity Proj (JS)
-                if (EditorPrefs.GetBool("kExternalEditorSupportsUnityProj", false))
-                {
-                    EditorPrefs.SetBool("VSCode_PreviousUnityProj", true);
-                }
-                EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", false);
-
-                // Attach to Editor
-                if (!EditorPrefs.GetBool("AllowAttachedDebuggingOfEditor", false))
-                {
-                    EditorPrefs.SetBool("VSCode_PreviousAttach", false);
-                }
-                EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", true);
-            }
-            else
-            {
-
-                // Restore previous app
-                if (!string.IsNullOrEmpty(EditorPrefs.GetString("VSCode_PreviousApp")))
-                {
-                    EditorPrefs.SetString("kScriptsDefaultApp", EditorPrefs.GetString("VSCode_PreviousApp"));
-                }
-
-                // Restore previous args
-                if (!string.IsNullOrEmpty(EditorPrefs.GetString("VSCode_PreviousArgs")))
-                {
-                    EditorPrefs.SetString("kScriptEditorArgs", EditorPrefs.GetString("VSCode_PreviousArgs"));
-                }
-
-                // Restore MD setting
-                if (EditorPrefs.GetBool("VSCode_PreviousMD", false))
-                {
-                    EditorPrefs.SetBool("kMonoDevelopSolutionProperties", true);
-                }
-
-                // Restore MD setting
-                if (EditorPrefs.GetBool("VSCode_PreviousUnityProj", false))
-                {
-                    EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", true);
-                }
-
-
-                // Restore previous attach
-                if (!EditorPrefs.GetBool("VSCode_PreviousAttach", true))
-                {
-                    EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", false);
+                    UnityEngine.Debug.Log("[VSCode] Integration Enabled");
+                } else {
+                    UnityEngine.Debug.Log("[VSCode] Integration Disabled");
                 }
             }
         }
@@ -593,6 +537,90 @@ namespace dotBunny.Unity
             // Write out proper formatted JSON (hence no more SimpleJSON here)
             string fileContent = "{\n\t\"version\":\"0.1.0\",\n\t\"configurations\":[ \n\t\t{\n\t\t\t\"name\":\"Unity\",\n\t\t\t\"type\":\"mono\",\n\t\t\t\"address\":\"localhost\",\n\t\t\t\"port\":" + port + "\n\t\t}\n\t]\n}";
             File.WriteAllText(VSCode.LaunchPath, fileContent);
+        }
+
+        /// <summary>
+        /// Update Unity Editor Preferences
+        static void UpdateUnityPreferences(bool enabled)
+        {
+            if (enabled)
+            {
+#if UNITY_EDITOR_OSX
+                var newPath =  "/Applications/Visual Studio Code.app";  
+#else
+                var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
+#endif
+
+                // App
+                if (EditorPrefs.GetString("kScriptsDefaultApp") != newPath)
+                {
+                    EditorPrefs.SetString("VSCode_PreviousApp", EditorPrefs.GetString("kScriptsDefaultApp"));
+                }
+                EditorPrefs.SetString("kScriptsDefaultApp", newPath);
+
+                // Arguments
+                if (EditorPrefs.GetString("kScriptEditorArgs") != "-r -g \"$(File):$(Line)\"")
+                {
+                    EditorPrefs.SetString("VSCode_PreviousArgs", EditorPrefs.GetString("kScriptEditorArgs"));
+                }
+
+                EditorPrefs.SetString("kScriptEditorArgs", "-r -g \"$(File):$(Line)\"");
+
+                // MonoDevelop Solution
+                if (EditorPrefs.GetBool("kMonoDevelopSolutionProperties", false))
+                {
+                    EditorPrefs.SetBool("VSCode_PreviousMD", true);
+                }
+                EditorPrefs.SetBool("kMonoDevelopSolutionProperties", false);
+
+                // Support Unity Proj (JS)
+                if (EditorPrefs.GetBool("kExternalEditorSupportsUnityProj", false))
+                {
+                    EditorPrefs.SetBool("VSCode_PreviousUnityProj", true);
+                }
+                EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", false);
+
+                // Attach to Editor
+                if (!EditorPrefs.GetBool("AllowAttachedDebuggingOfEditor", false))
+                {
+                    EditorPrefs.SetBool("VSCode_PreviousAttach", false);
+                }
+                EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", true);
+            }
+            else
+            {
+
+                // Restore previous app
+                if (!string.IsNullOrEmpty(EditorPrefs.GetString("VSCode_PreviousApp")))
+                {
+                    EditorPrefs.SetString("kScriptsDefaultApp", EditorPrefs.GetString("VSCode_PreviousApp"));
+                }
+
+                // Restore previous args
+                if (!string.IsNullOrEmpty(EditorPrefs.GetString("VSCode_PreviousArgs")))
+                {
+                    EditorPrefs.SetString("kScriptEditorArgs", EditorPrefs.GetString("VSCode_PreviousArgs"));
+                }
+
+                // Restore MD setting
+                if (EditorPrefs.GetBool("VSCode_PreviousMD", false))
+                {
+                    EditorPrefs.SetBool("kMonoDevelopSolutionProperties", true);
+                }
+
+                // Restore MD setting
+                if (EditorPrefs.GetBool("VSCode_PreviousUnityProj", false))
+                {
+                    EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", true);
+                }
+
+
+                // Restore previous attach
+                if (!EditorPrefs.GetBool("VSCode_PreviousAttach", true))
+                {
+                    EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", false);
+                }
+            }
         }
 
         /// <summary>

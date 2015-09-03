@@ -105,6 +105,13 @@ namespace dotBunny.Unity
 		/// </summary>
 		public static void UpdateSolution ()
 		{
+			// No need to process if we are not enabled
+			if ( !VSCode.Enabled ) { return; }
+
+			if ( VSCode.Debug ) { 
+				UnityEngine.Debug.Log("[VSCode] Updating Solution & Project Files");
+			}
+
 			var currentDirectory = Directory.GetCurrentDirectory ();
 			var solutionFiles = Directory.GetFiles (currentDirectory, "*.sln");
 			var projectFiles = Directory.GetFiles (currentDirectory, "*.csproj");
@@ -479,6 +486,9 @@ namespace dotBunny.Unity
 			defaultNode ["configurations"] [-1] = defaultClass;
 
 			if (!Directory.Exists(VSCode.SettingsFolder)) {
+				if ( VSCode.Debug ) {
+					UnityEngine.Debug.Log("[VSCode] Visual Studio Code settings not found, creating necessary folder.");
+				}
 				System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);
 			}
 			

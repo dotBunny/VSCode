@@ -4,14 +4,13 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version: 
- *   1.7.1
+ *   1.8
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
  */
 // REQUIRES: VSCode 0.8.0 - Settings directory moved to .vscode
 // TODO: Currently VSCode will not debug mono on Windows -- need a solution.
-// TODO: Remove reliance on SimpleJSON - Unity 5.3 JSON serializer
 namespace dotBunny.Unity
 {
 	using System.IO;
@@ -144,28 +143,26 @@ namespace dotBunny.Unity
 		{
 			System.Diagnostics.Process proc = new System.Diagnostics.Process ();
 
-			if (UnityEngine.Application.platform == UnityEngine.RuntimePlatform.WindowsEditor) {
-				UnityEngine.Debug.Log ("code " + args);
-				proc.StartInfo.FileName = "code";
-				proc.StartInfo.Arguments = args;
-				proc.StartInfo.UseShellExecute = false;
-				
-			} else {
-				proc.StartInfo.FileName = "open";
-				proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
-				proc.StartInfo.UseShellExecute = false;
-			}
-
+#if UNITY_EDITOR_OSX
+            proc.StartInfo.FileName = "open";
+            proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
+            proc.StartInfo.UseShellExecute = false;
+#else
+            proc.StartInfo.FileName = "code";
+            proc.StartInfo.Arguments = args;
+            proc.StartInfo.UseShellExecute = false;
+#endif
 			proc.StartInfo.RedirectStandardOutput = true;
 			proc.Start ();
 		}
 
 		/// <summary>
-		/// Determine what port Unity is listening for on Mac
+		/// Determine what port Unity is listening for on Windows
 		/// </summary>
-		static int GetMacDebugPort ()
+		static int GetDebugPort ()
 		{
-			System.Diagnostics.Process process = new System.Diagnostics.Process ();
+#if UNITY_EDITOR_OSX
+            System.Diagnostics.Process process = new System.Diagnostics.Process ();
 			process.StartInfo.FileName = "lsof";
 			process.StartInfo.Arguments = "-c /^Unity$/ -i 4tcp -a";
 			process.StartInfo.UseShellExecute = false;
@@ -193,14 +190,7 @@ namespace dotBunny.Unity
 					}
 				}
 			}
-			return -1;
-		}
-
-		/// <summary>
-		/// Determine what port Unity is listening for on Windows
-		/// </summary>
-		static int GetWindowsDebugPort ()
-		{
+#else
 			System.Diagnostics.Process process = new System.Diagnostics.Process ();
 			process.StartInfo.FileName = "netstat";
 			process.StartInfo.Arguments = "-a -n -o -p TCP";
@@ -231,6 +221,7 @@ namespace dotBunny.Unity
 					}
 				}
 			}
+#endif
 			return -1;
 		}
 
@@ -246,6 +237,72 @@ namespace dotBunny.Unity
 		{
 			Menu.SetChecked ("Assets/VS Code/Enable Integration", !Enabled);
 			Enabled = !Enabled;
+            
+            if ( Enabled ) {
+#if UNITY_EDITOR_OSX
+                var newPath =  "/Applications/Visual Studio Code.app";  
+#else
+                var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
+#endif
+
+                // App
+                if ( EditorPrefs.GetString("kScriptsDefaultApp") != newPath ) {
+                    EditorPrefs.SetString("VSCode_PreviousApp", EditorPrefs.GetString("kScriptsDefaultApp"));
+                }
+                EditorPrefs.SetString("kScriptsDefaultApp", newPath);
+                
+                // Arguments
+                if ( EditorPrefs.GetString("kScriptEditorArgs") != "-r -g \"$(File):$(Line)\"" ) {
+                    EditorPrefs.SetString("VSCode_PreviousArgs", EditorPrefs.GetString("kScriptEditorArgs"));
+                }
+                
+                EditorPrefs.SetString("kScriptEditorArgs", "-r -g \"$(File):$(Line)\"");
+                
+                // MonoDevelop Solution
+                if ( EditorPrefs.GetBool("kMonoDevelopSolutionProperties", false) ) {
+                    EditorPrefs.SetBool("VSCode_PreviousMD", true);
+                }
+                EditorPrefs.SetBool("kMonoDevelopSolutionProperties", false);
+                
+                // Support Unity Proj (JS)
+                if ( EditorPrefs.GetBool("kExternalEditorSupportsUnityProj", false) ) {
+                    EditorPrefs.SetBool("VSCode_PreviousUnityProj", true);
+                }
+                EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", false);
+                
+                // Attach to Editor
+                if ( !EditorPrefs.GetBool("AllowAttachedDebuggingOfEditor", false) ) {
+                    EditorPrefs.SetBool("VSCode_PreviousAttach", false);
+                }
+                EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", true);
+            } else {
+                
+                // Restore previous app
+                if ( !string.IsNullOrEmpty(EditorPrefs.GetString("VSCode_PreviousApp"))) {
+                    EditorPrefs.SetString("kScriptsDefaultApp", EditorPrefs.GetString("VSCode_PreviousApp"));
+                }
+                 
+                // Restore previous args
+                if ( !string.IsNullOrEmpty(EditorPrefs.GetString("VSCode_PreviousArgs"))) {
+                    EditorPrefs.SetString("kScriptEditorArgs", EditorPrefs.GetString("VSCode_PreviousArgs"));
+                }
+                
+                // Restore MD setting
+                if ( EditorPrefs.GetBool("VSCode_PreviousMD", false) ) {
+                    EditorPrefs.SetBool("kMonoDevelopSolutionProperties", true);
+                }
+                
+                // Restore MD setting
+                if ( EditorPrefs.GetBool("VSCode_PreviousUnityProj", false) ) {
+                    EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", true);
+                }
+
+                
+                // Restore previous attach
+                if ( !EditorPrefs.GetBool("VSCode_PreviousAttach", true) ) {
+                    EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", false);
+                }
+            }
 		}
 
 		[MenuItem ("Assets/VS Code/Force Sync Project", false, 201)]
@@ -325,6 +382,7 @@ namespace dotBunny.Unity
 
 			// Didnt find a code file? let Unity figure it out
 			return false;
+            
 		}
 
 		/// <summary>
@@ -333,13 +391,7 @@ namespace dotBunny.Unity
 		static void OnPlaymodeStateChanged ()
 		{
 			if (VSCode.Enabled && UnityEngine.Application.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode) {
-				int port = -1;
-				if (UnityEngine.Application.platform == UnityEngine.RuntimePlatform.WindowsEditor) {
-					port = GetWindowsDebugPort ();
-				} else {
-					port = GetMacDebugPort ();
-				}
-                
+				int port = GetDebugPort();                
 				if (port > -1) {
 
 					UpdateLaunchFile (port);
@@ -473,58 +525,9 @@ namespace dotBunny.Unity
 		/// </summary>
 		static void UpdateLaunchFile (int port)
 		{
-			//TODO Eventually all this JSON can be replaced with intragrated JSON
-            
-			// Create Default Config
-			SimpleJSON.JSONClass defaultClass = new SimpleJSON.JSONClass ();
-			defaultClass ["name"] = "Unity";
-			defaultClass ["type"] = "mono";
-			defaultClass ["address"] = "localhost";
-			defaultClass ["port"].AsInt = port;
-			defaultClass ["sourceMaps"].AsBool = false;
-            
-			// Create Default Node
-			SimpleJSON.JSONNode defaultNode = new SimpleJSON.JSONClass ();
-			defaultNode ["version"] = "0.1.0";
-			defaultNode ["configurations"] [-1] = defaultClass;
-
-			if (!Directory.Exists (VSCode.SettingsFolder)) {
-				if (VSCode.Debug) {
-					UnityEngine.Debug.Log ("[VSCode] Visual Studio Code settings not found, creating necessary folder.");
-				}
-				System.IO.Directory.CreateDirectory (VSCode.SettingsFolder);
-			}
-			
-			if (!File.Exists (VSCode.LaunchPath)) {
-				File.WriteAllText (VSCode.LaunchPath, defaultNode.ToString ());
-			} else {
-				string rawContent = File.ReadAllText (VSCode.LaunchPath);
-				SimpleJSON.JSONNode existingNode = SimpleJSON.JSON.Parse (rawContent);
-
-				bool found = false;
-                
-				if (existingNode != null && existingNode ["configurations"] != null) {
-					int index = 0;
-                    
-					foreach (SimpleJSON.JSONNode conf in existingNode["configurations"].AsArray) {
-						if (conf ["name"].Value == "Unity") {
-							found = true;
-							break;
-						}
-						index++;
-					}
-    
-					if (found) {
-						existingNode ["configurations"] [index] = defaultClass;
-					}
-				}
-                
-				if (found) {
-					File.WriteAllText (VSCode.LaunchPath, existingNode.ToString ());
-				} else {
-					File.WriteAllText (VSCode.LaunchPath, defaultNode.ToString ());
-				}
-			} 
+			// Write out proper formatted JSON (hence no more SimpleJSON here)
+            string fileContent = "{\n\t\"version\":\"0.1.0\",\n\t\"configurations\":[ \n\t\t{\n\t\t\t\"name\":\"Unity\",\n\t\t\t\"type\":\"mono\",\n\t\t\t\"address\":\"localhost\",\n\t\t\t\"port\":" + port + "\n\t\t}\n\t]\n}";
+            File.WriteAllText(VSCode.LaunchPath, fileContent); 
 		}
 
 		/// <summary>
@@ -532,89 +535,89 @@ namespace dotBunny.Unity
 		/// </summary>
 		static void WriteWorkspaceSettings ()
 		{
-			SimpleJSON.JSONClass exclusions = new SimpleJSON.JSONClass ();
-            
-			// Hidden
-			exclusions ["**/.DS_Store"].AsBool = true;
-			exclusions ["**/.git"].AsBool = true;
-            
-			// Project Related
-			exclusions ["**/*.booproj"].AsBool = true;
-			//exclusions ["**/*.csproj"].AsBool = true;
-			exclusions ["**/*.pidb"].AsBool = true;
-			//exclusions ["**/*.sln"].AsBool = true;
-			exclusions ["**/*.suo"].AsBool = true;
-			exclusions ["**/*.user"].AsBool = true;
-			exclusions ["**/*.userprefs"].AsBool = true;
-			exclusions ["**/*.unityproj"].AsBool = true;
-            
-			// References
-			exclusions ["**/*.dll"].AsBool = true;
-			exclusions ["**/*.exe"].AsBool = true;
-            
-			// Media
-			exclusions ["**/*.gif"].AsBool = true;
-			exclusions ["**/*.ico"].AsBool = true;
-			exclusions ["**/*.jpg"].AsBool = true;
-			exclusions ["**/*.jpeg"].AsBool = true;
-			exclusions ["**/*.mid"].AsBool = true;
-			exclusions ["**/*.midi"].AsBool = true;
-			exclusions ["**/*.pdf"].AsBool = true;
-			exclusions ["**/*.png"].AsBool = true;
-			exclusions ["**/*.psd"].AsBool = true;
-			exclusions ["**/*.tga"].AsBool = true;
-			exclusions ["**/*.tif"].AsBool = true;
-			exclusions ["**/*.tiff"].AsBool = true;
-			exclusions ["**/*.wav"].AsBool = true;
-
-			// Unity
-			exclusions ["**/*.asset"].AsBool = true;
-			exclusions ["**/*.cubemap"].AsBool = true;
-			exclusions ["**/*.flare"].AsBool = true;
-			exclusions ["**/*.mat"].AsBool = true;
-			exclusions ["**/*.meta"].AsBool = true;
-			exclusions ["**/*.*.meta"].AsBool = true;
-			exclusions ["**/*.pidb.meta"].AsBool = true;
-			exclusions ["**/*.prefab"].AsBool = true; 
-			exclusions ["**/*.unity"].AsBool = true;
-
-			// Models
-			exclusions ["**/*.3ds"].AsBool = true;
-			exclusions ["**/*.3DS"].AsBool = true;
-			exclusions ["**/*.fbx"].AsBool = true;
-			exclusions ["**/*.FBX"].AsBool = true;
-			exclusions ["**/*.lxo"].AsBool = true;
-			exclusions ["**/*.LXO"].AsBool = true;
-			exclusions ["**/*.ma"].AsBool = true;
-			exclusions ["**/*.MA"].AsBool = true;
-			exclusions ["**/*.obj"].AsBool = true;
-			exclusions ["**/*.OBJ"].AsBool = true;
-        
-			// Folders
-			exclusions ["build/"].AsBool = true;
-			exclusions ["Build/"].AsBool = true;
-			exclusions ["library/"].AsBool = true;
-			exclusions ["Library/"].AsBool = true;
-			exclusions ["obj/"].AsBool = true;
-			exclusions ["Obj/"].AsBool = true;
-			exclusions ["ProjectSettings/"].AsBool = true;
-			exclusions ["temp/"].AsBool = true;
-			exclusions ["Temp/"].AsBool = true;
-            
-			SimpleJSON.JSONClass file = new SimpleJSON.JSONClass ();
-
-			file ["files.exclude"] = exclusions;
-			
 			if (!Directory.Exists (VSCode.SettingsFolder)) {
 				System.IO.Directory.CreateDirectory (VSCode.SettingsFolder);
 			}
+
+            string exclusions =
+            "{\n" +
+                "\t\"files.exclude\":\n" +
+                "\t{\n" +
+                    // Hidden Files
+                    "\t\t\"**/.DS_Store\":true,\n" +
+                    "\t\t\"**/.git\":true,\n" +
+
+                    // Project Files
+                    "\t\t\"**/*.booproj\":true,\n" +
+                    "\t\t\"**/*.pidb\":true,\n" +
+                    "\t\t\"**/*.suo\":true,\n" +
+                    "\t\t\"**/*.user\":true,\n" +
+                    "\t\t\"**/*.userprefs\":true,\n" +
+                    "\t\t\"**/*.unityproj\":true,\n" +
+                    "\t\t\"**/*.dll\":true,\n" +
+                    "\t\t\"**/*.exe\":true,\n" +
+
+                    // Media Files
+                    "\t\t\"**/*.pdf\":true,\n" +
+
+                    // Audio
+                    "\t\t\"**/*.mid\":true,\n" +
+                    "\t\t\"**/*.midi\":true,\n" +
+                    "\t\t\"**/*.wav\":true,\n" +
+
+                    // Textures
+                    "\t\t\"**/*.gif\":true,\n" +
+                    "\t\t\"**/*.ico\":true,\n" +
+                    "\t\t\"**/*.jpg\":true,\n" +
+                    "\t\t\"**/*.jpeg\":true,\n" +
+                    "\t\t\"**/*.png\":true,\n" +
+                    "\t\t\"**/*.psd\":true,\n" +
+                    "\t\t\"**/*.tga\":true,\n" +
+                    "\t\t\"**/*.tif\":true,\n" +
+                    "\t\t\"**/*.tiff\":true,\n" +
+
+                    // Models
+                    "\t\t\"**/*.3ds\":true,\n" +
+                    "\t\t\"**/*.3DS\":true,\n" +
+                    "\t\t\"**/*.fbx\":true,\n" +
+                    "\t\t\"**/*.FBX\":true,\n" +
+                    "\t\t\"**/*.lxo\":true,\n" +
+                    "\t\t\"**/*.LXO\":true,\n" +
+                    "\t\t\"**/*.ma\":true,\n" +
+                    "\t\t\"**/*.MA\":true,\n" +
+                    "\t\t\"**/*.obj\":true,\n" +
+                    "\t\t\"**/*.OBJ\":true,\n" +
+
+                    // Unity File Types
+                    "\t\t\"**/*.asset\":true,\n" +
+                    "\t\t\"**/*.cubemap\":true,\n" +
+                    "\t\t\"**/*.flare\":true,\n" +
+                    "\t\t\"**/*.mat\":true,\n" +
+                    "\t\t\"**/*.meta\":true,\n" +
+                    "\t\t\"**/*.prefab\":true,\n" +
+                    "\t\t\"**/*.unity\":true,\n" +
+
+                   // Folders
+                   "\t\t\"build/\":true,\n" +
+                   "\t\t\"Build/\":true,\n" +
+                   "\t\t\"Library/\":true,\n" +
+                   "\t\t\"library/\":true,\n" +
+                   "\t\t\"obj/\":true,\n" +
+                   "\t\t\"Obj/\":true,\n" +
+                   "\t\t\"ProjectSettings/\":true,\r" +
+                   "\t\t\"temp/\":true,\n" +
+                   "\t\t\"Temp/\":true\n" +
+                "\t}\n" +
+            "}";
             
 			// Dont like the replace but it fixes the issue with the JSON
-			File.WriteAllText (VSCode.SettingsPath, file.ToString ().Replace ("\"true\"", "true"));
+			File.WriteAllText (VSCode.SettingsPath, exclusions);
 		}
 
 		#endregion
 	}
+    
+    
 
 	/// <summary>
 	/// VSCode Asset AssetPostprocessor

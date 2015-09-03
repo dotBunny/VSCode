@@ -12,7 +12,6 @@
 // REQUIRES: VSCode 0.8.0 - Settings directory moved to .vscode
 // TODO: Currently VSCode will not debug mono on Windows -- need a solution.
 // TODO: Remove reliance on SimpleJSON - Unity 5.3 JSON serializer
-// TODO: Ignoring folders isnt working the way i want in the default workspace settings - talking with @code about iit.
 namespace dotBunny.Unity
 {
 	using System.IO;
@@ -49,8 +48,8 @@ namespace dotBunny.Unity
 				EditorPrefs.SetBool ("VSCode_Enabled", value);
 			}
 		}
-		
-        /// <summary>
+
+		/// <summary>
 		/// Quick reference to the VSCode settings folder
 		/// </summary>
 		static string SettingsFolder {
@@ -58,7 +57,7 @@ namespace dotBunny.Unity
 				return ProjectPath + System.IO.Path.DirectorySeparatorChar + ".vscode";
 			}
 		}
-        
+
 		/// <summary>
 		/// Quick reference to the VSCode launch settings file
 		/// </summary>
@@ -76,12 +75,12 @@ namespace dotBunny.Unity
 				return System.IO.Path.GetDirectoryName (UnityEngine.Application.dataPath);
 			}
 		}
-        
-        static string SettingsPath {
-            get {
-                return SettingsFolder + System.IO.Path.DirectorySeparatorChar + "settings.json";
-            }
-        }
+
+		static string SettingsPath {
+			get {
+				return SettingsFolder + System.IO.Path.DirectorySeparatorChar + "settings.json";
+			}
+		}
 
 		#endregion
 
@@ -106,10 +105,12 @@ namespace dotBunny.Unity
 		public static void UpdateSolution ()
 		{
 			// No need to process if we are not enabled
-			if ( !VSCode.Enabled ) { return; }
+			if (!VSCode.Enabled) {
+				return;
+			}
 
-			if ( VSCode.Debug ) { 
-				UnityEngine.Debug.Log("[VSCode] Updating Solution & Project Files");
+			if (VSCode.Debug) { 
+				UnityEngine.Debug.Log ("[VSCode] Updating Solution & Project Files");
 			}
 
 			var currentDirectory = Directory.GetCurrentDirectory ();
@@ -129,6 +130,7 @@ namespace dotBunny.Unity
 				File.WriteAllText (filePath, content);
 				ScrubFile (filePath);
 			}
+
 		}
 
 		#endregion
@@ -143,7 +145,7 @@ namespace dotBunny.Unity
 			System.Diagnostics.Process proc = new System.Diagnostics.Process ();
 
 			if (UnityEngine.Application.platform == UnityEngine.RuntimePlatform.WindowsEditor) {
-				UnityEngine.Debug.Log("code " + args);
+				UnityEngine.Debug.Log ("code " + args);
 				proc.StartInfo.FileName = "code";
 				proc.StartInfo.Arguments = args;
 				proc.StartInfo.UseShellExecute = false;
@@ -215,9 +217,9 @@ namespace dotBunny.Unity
 				string[] tokens = Regex.Split (line, "\\s+");
 				if (tokens.Length > 4) {
 					int test = -1;
-					int.TryParse(tokens[5], out test);
+					int.TryParse (tokens [5], out test);
 					
-					if ( test > 1023 ) {
+					if (test > 1023) {
 						try {
 							var p = System.Diagnostics.Process.GetProcessById (test);
 							if (p.ProcessName == "Unity") {
@@ -245,7 +247,7 @@ namespace dotBunny.Unity
 			Menu.SetChecked ("Assets/VS Code/Enable Integration", !Enabled);
 			Enabled = !Enabled;
 		}
-        
+
 		[MenuItem ("Assets/VS Code/Force Sync Project", false, 201)]
 		public static void MenuForceSyncProject ()
 		{
@@ -279,12 +281,12 @@ namespace dotBunny.Unity
 			Menu.SetChecked ("Assets/VS Code/Enable Integration", Enabled);
 			return true;
 		}
-        
-        [MenuItem ("Assets/VS Code/Write Workspace Settings", false, 202)]
-        public static void MenuWriteWorkspaceSettings()
-        {
-            WriteWorkspaceSettings();
-        }
+
+		[MenuItem ("Assets/VS Code/Write Workspace Settings", false, 202)]
+		public static void MenuWriteWorkspaceSettings ()
+		{
+			WriteWorkspaceSettings ();
+		}
 
 		/// <summary>
 		/// Asset Open Callback (from Unity)
@@ -386,7 +388,8 @@ namespace dotBunny.Unity
 		/// </summary>
 		static string ScrubProjectContent (string content)
 		{
-			if ( content.Length == 0 ) return "";
+			if (content.Length == 0)
+				return "";
 			
 			// Make sure our reference framework is 2.0, still the base for Unity
 			if (content.IndexOf ("<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>") != -1) {
@@ -485,11 +488,11 @@ namespace dotBunny.Unity
 			defaultNode ["version"] = "0.1.0";
 			defaultNode ["configurations"] [-1] = defaultClass;
 
-			if (!Directory.Exists(VSCode.SettingsFolder)) {
-				if ( VSCode.Debug ) {
-					UnityEngine.Debug.Log("[VSCode] Visual Studio Code settings not found, creating necessary folder.");
+			if (!Directory.Exists (VSCode.SettingsFolder)) {
+				if (VSCode.Debug) {
+					UnityEngine.Debug.Log ("[VSCode] Visual Studio Code settings not found, creating necessary folder.");
 				}
-				System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);
+				System.IO.Directory.CreateDirectory (VSCode.SettingsFolder);
 			}
 			
 			if (!File.Exists (VSCode.LaunchPath)) {
@@ -523,92 +526,92 @@ namespace dotBunny.Unity
 				}
 			} 
 		}
-        
-        /// <summary>
+
+		/// <summary>
 		/// Write Default Workspace Settings
 		/// </summary>
-        static void WriteWorkspaceSettings()
-        {
-            SimpleJSON.JSONClass exclusions = new SimpleJSON.JSONClass ();
+		static void WriteWorkspaceSettings ()
+		{
+			SimpleJSON.JSONClass exclusions = new SimpleJSON.JSONClass ();
             
-            // Hidden
-            exclusions["**/.DS_Store"].AsBool = true;
-            exclusions["**/.git"].AsBool = true;
+			// Hidden
+			exclusions ["**/.DS_Store"].AsBool = true;
+			exclusions ["**/.git"].AsBool = true;
             
-            // Project Related
-            exclusions["**/*.booproj"].AsBool = true;
-            exclusions["**/*.csproj"].AsBool = true;
-            exclusions["**/*.pidb"].AsBool = true;
-            exclusions["**/*.sln"].AsBool = true;
-            exclusions["**/*.suo"].AsBool = true;
-            exclusions["**/*.user"].AsBool = true;
-            exclusions["**/*.userprefs"].AsBool = true;
-            exclusions["**/*.unityproj"].AsBool = true;
+			// Project Related
+			exclusions ["**/*.booproj"].AsBool = true;
+			//exclusions ["**/*.csproj"].AsBool = true;
+			exclusions ["**/*.pidb"].AsBool = true;
+			//exclusions ["**/*.sln"].AsBool = true;
+			exclusions ["**/*.suo"].AsBool = true;
+			exclusions ["**/*.user"].AsBool = true;
+			exclusions ["**/*.userprefs"].AsBool = true;
+			exclusions ["**/*.unityproj"].AsBool = true;
             
-            // References
-            exclusions["**/*.dll"].AsBool = true;
-            exclusions["**/*.exe"].AsBool = true;
+			// References
+			exclusions ["**/*.dll"].AsBool = true;
+			exclusions ["**/*.exe"].AsBool = true;
             
-            // Media
-            exclusions["**/*.gif"].AsBool = true;
-            exclusions["**/*.ico"].AsBool = true;
-            exclusions["**/*.jpg"].AsBool = true;
-            exclusions["**/*.jpeg"].AsBool = true;
-            exclusions["**/*.mid"].AsBool = true;
-            exclusions["**/*.midi"].AsBool = true;
-            exclusions["**/*.pdf"].AsBool = true;
-            exclusions["**/*.png"].AsBool = true;
-            exclusions["**/*.psd"].AsBool = true;
-            exclusions["**/*.tga"].AsBool = true;
-            exclusions["**/*.tif"].AsBool = true;
-            exclusions["**/*.tiff"].AsBool = true;
-            exclusions["**/*.wav"].AsBool = true;
+			// Media
+			exclusions ["**/*.gif"].AsBool = true;
+			exclusions ["**/*.ico"].AsBool = true;
+			exclusions ["**/*.jpg"].AsBool = true;
+			exclusions ["**/*.jpeg"].AsBool = true;
+			exclusions ["**/*.mid"].AsBool = true;
+			exclusions ["**/*.midi"].AsBool = true;
+			exclusions ["**/*.pdf"].AsBool = true;
+			exclusions ["**/*.png"].AsBool = true;
+			exclusions ["**/*.psd"].AsBool = true;
+			exclusions ["**/*.tga"].AsBool = true;
+			exclusions ["**/*.tif"].AsBool = true;
+			exclusions ["**/*.tiff"].AsBool = true;
+			exclusions ["**/*.wav"].AsBool = true;
 
-            // Unity
-            exclusions["**/*.asset"].AsBool = true;
-            exclusions["**/*.cubemap"].AsBool = true;
-            exclusions["**/*.flare"].AsBool = true;
-            exclusions["**/*.mat"].AsBool = true;
-            exclusions["**/*.meta"].AsBool = true;
-            exclusions["**/*.*.meta"].AsBool = true;
-            exclusions["**/*.pidb.meta"].AsBool = true;
-            exclusions["**/*.prefab"].AsBool = true; 
-            exclusions["**/*.unity"].AsBool = true;
+			// Unity
+			exclusions ["**/*.asset"].AsBool = true;
+			exclusions ["**/*.cubemap"].AsBool = true;
+			exclusions ["**/*.flare"].AsBool = true;
+			exclusions ["**/*.mat"].AsBool = true;
+			exclusions ["**/*.meta"].AsBool = true;
+			exclusions ["**/*.*.meta"].AsBool = true;
+			exclusions ["**/*.pidb.meta"].AsBool = true;
+			exclusions ["**/*.prefab"].AsBool = true; 
+			exclusions ["**/*.unity"].AsBool = true;
 
-            // Models
-            exclusions["**/*.3ds"].AsBool = true;
-            exclusions["**/*.3DS"].AsBool = true;
-            exclusions["**/*.fbx"].AsBool = true;
-            exclusions["**/*.FBX"].AsBool = true;
-            exclusions["**/*.lxo"].AsBool = true;
-            exclusions["**/*.LXO"].AsBool = true;
-            exclusions["**/*.ma"].AsBool = true;
-            exclusions["**/*.MA"].AsBool = true;
-            exclusions["**/*.obj"].AsBool = true;
-            exclusions["**/*.OBJ"].AsBool = true;
+			// Models
+			exclusions ["**/*.3ds"].AsBool = true;
+			exclusions ["**/*.3DS"].AsBool = true;
+			exclusions ["**/*.fbx"].AsBool = true;
+			exclusions ["**/*.FBX"].AsBool = true;
+			exclusions ["**/*.lxo"].AsBool = true;
+			exclusions ["**/*.LXO"].AsBool = true;
+			exclusions ["**/*.ma"].AsBool = true;
+			exclusions ["**/*.MA"].AsBool = true;
+			exclusions ["**/*.obj"].AsBool = true;
+			exclusions ["**/*.OBJ"].AsBool = true;
         
-            // Folders
-            exclusions["build/"].AsBool = true;
-            exclusions["Build/"].AsBool = true;
-            exclusions["library/"].AsBool = true;
-            exclusions["Library/"].AsBool = true;
-            exclusions["obj/"].AsBool = true;
-            exclusions["Obj/"].AsBool = true;
-            exclusions["ProjectSettings/"].AsBool = true;
-            exclusions["temp/"].AsBool = true;
-            exclusions["Temp/"].AsBool = true;
+			// Folders
+			exclusions ["build/"].AsBool = true;
+			exclusions ["Build/"].AsBool = true;
+			exclusions ["library/"].AsBool = true;
+			exclusions ["Library/"].AsBool = true;
+			exclusions ["obj/"].AsBool = true;
+			exclusions ["Obj/"].AsBool = true;
+			exclusions ["ProjectSettings/"].AsBool = true;
+			exclusions ["temp/"].AsBool = true;
+			exclusions ["Temp/"].AsBool = true;
             
-            SimpleJSON.JSONClass file = new SimpleJSON.JSONClass ();
+			SimpleJSON.JSONClass file = new SimpleJSON.JSONClass ();
 
-            file["files.exclude"] = exclusions;
+			file ["files.exclude"] = exclusions;
 			
-            if (!Directory.Exists(VSCode.SettingsFolder)) {
-				System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);
+			if (!Directory.Exists (VSCode.SettingsFolder)) {
+				System.IO.Directory.CreateDirectory (VSCode.SettingsFolder);
 			}
             
-            // Dont like the replace but it fixes the issue with the JSON
-            File.WriteAllText (VSCode.SettingsPath, file.ToString ().Replace("\"true\"", "true"));
-        }
+			// Dont like the replace but it fixes the issue with the JSON
+			File.WriteAllText (VSCode.SettingsPath, file.ToString ().Replace ("\"true\"", "true"));
+		}
 
 		#endregion
 	}

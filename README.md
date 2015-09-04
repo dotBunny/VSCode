@@ -12,6 +12,8 @@ Once the VSCode file is in place, simply navigate your way to the `Assets | VS C
 
 That's it! Your ready to go!
 
+OK, so maybe some people need a little video explaining some of the finer details of how to use the plugin. So I shot a [quick video](https://vimeo.com/dotbunny/vscode) that highlights the ups and the downs (like Unity hanging after debugging sometimes) for people to watch.
+
 ## Platform Support
 I use the plugin every day on a Mac (so it's battle tested there), and occasionally test it on a Windows VM. As for the recently announced Linux support, it should work just like the Mac version. I'll get around to installing the Linux editor sometime in the near future.
 

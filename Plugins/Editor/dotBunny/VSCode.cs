@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version: 
- *   1.8
+ *   1.9
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -55,6 +55,24 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
+        /// Should the launch.json file be written?
+        /// </summary>
+        /// <remarks>
+        /// Useful to disable if someone has their own custom one rigged up
+        /// </remarks>
+        public static bool WriteLaunchFile
+        {
+            get
+            {
+                return EditorPrefs.GetBool("VSCode_WriteLaunchFile", true);
+            }
+            set
+            {
+                EditorPrefs.SetBool("VSCode_WriteLaunchFile", value);
+            }
+        }
+        
+        /// <summary>
         /// Quick reference to the VSCode settings folder
         /// </summary>
         static string SettingsFolder
@@ -94,6 +112,8 @@ namespace dotBunny.Unity
                 return SettingsFolder + System.IO.Path.DirectorySeparatorChar + "settings.json";
             }
         }
+        
+        
 
         #endregion
 
@@ -262,10 +282,10 @@ namespace dotBunny.Unity
             return -1;
         }
 
-        [MenuItem("Assets/VS Code/Enable Logging")]
+        [MenuItem("Assets/VS Code/Additional Options/Log To Console")]
         static void MenuEnableDebug()
         {
-            Menu.SetChecked("Assets/VS Code/Enable Logging", !Debug);
+            Menu.SetChecked("Assets/VS Code/Additional Options/Log To Console", !Debug);
             Debug = !Debug;
         }
 
@@ -286,6 +306,13 @@ namespace dotBunny.Unity
                 }
             }
         }
+        
+        [MenuItem("Assets/VS Code/Additional Options/Write Launch File")]
+        static void MenuEnableWriteLaunchFile()
+        {
+            Menu.SetChecked("Assets/VS Code/Additional Options/Write Launch File", !WriteLaunchFile);
+            WriteLaunchFile = !WriteLaunchFile;
+        }
 
         [MenuItem("Assets/VS Code/Force Sync Project", false, 201)]
         public static void MenuForceSyncProject()
@@ -297,16 +324,29 @@ namespace dotBunny.Unity
         [MenuItem("Assets/VS Code/Open Project", false, 100)]
         static void MenuOpenProject()
         {
+            // Force the project files to be sync
+            SyncSolution();
+            
+            // Load Project
             CallVSCode("\"" + ProjectPath + "\" -r");
         }
 
         /// <summary>
-        /// Update "Enable Debug" menu item
+        /// Update "Log To Console" menu item
         /// </summary>
-        [MenuItem("Assets/VS Code/Enable Logging", true, 301)]
+        [MenuItem("Assets/VS Code/Additional Options/Log To Console", true, 220)]
         static bool MenuValidateMenuEnableDebug()
         {
-            Menu.SetChecked("Assets/VS Code/Enable Logging", Debug);
+            Menu.SetChecked("Assets/VS Code/Additional Options/Log To Console", Debug);
+            return true;
+        }
+        /// <summary>
+        /// Update "Write Launch File" menu item
+        /// </summary>
+        [MenuItem("Assets/VS Code/Additional Options/Write Launch File", true, 223)]
+        static bool MenuValidateMenuEnableWriteLaunchFile()
+        {
+            Menu.SetChecked("Assets/VS Code/Additional Options/Write Launch File", WriteLaunchFile);
             return true;
         }
 
@@ -355,11 +395,12 @@ namespace dotBunny.Unity
                 string args = null;
                 if (line == -1)
                 {
-                    args = "\"" + completeFilepath + "\" -r";
+                    
+                    args = "\"" + ProjectPath + "\" \"" + completeFilepath + "\" -r";
                 }
                 else
                 {
-                    args = "-g \"" + completeFilepath + ":" + line.ToString() + "\" -r";
+                    args = "\"" + ProjectPath + "\" -g \"" + completeFilepath + ":" + line.ToString() + "\" -r";
                 }
                 // call 'open'
                 CallVSCode(args);
@@ -377,7 +418,7 @@ namespace dotBunny.Unity
         /// </summary>
         static void OnPlaymodeStateChanged()
         {
-            if (VSCode.Enabled && UnityEngine.Application.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode)
+            if (VSCode.Enabled && VSCode.WriteLaunchFile && UnityEngine.Application.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 int port = GetDebugPort();
                 if (port > -1)

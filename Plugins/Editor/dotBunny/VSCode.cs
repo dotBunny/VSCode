@@ -290,20 +290,21 @@ namespace dotBunny.Unity
             var y = 50f;
             GUI.Label( new Rect(x, y,         200, 30), "Enable Integration" );
             GUI.Label( new Rect(x, y +17,     200, 30), "Log To Console" );
-            GUI.Label( new Rect(x, y +17 +17, 200, 30), "Write Launch File" )
+            GUI.Label( new Rect(x, y +17 +17, 200, 30), "Write Launch File" );
 
             x = 135f + 180f;
             var toggleSize = 17f;
-            var savedEnabled = Enabled
+            var savedEnabled = Enabled;
 
             Enabled =         GUI.Toggle( new Rect(x, y,         toggleSize, toggleSize), Enabled, "" );
             Debug =           GUI.Toggle( new Rect(x, y +17,     toggleSize, toggleSize), Debug, "");
-            WriteLaunchFile = GUI.Toggle( new Rect(x, y +17 +17, toggleSize, toggleSize), WriteLaunchFile, "")
+            WriteLaunchFile = GUI.Toggle( new Rect(x, y +17 +17, toggleSize, toggleSize), WriteLaunchFile, "");
 
             if (Enabled != savedEnabled)
             {
-                UpdateUnityPreferences(Enabled)
-                if (VSCode.Debug) {
+                UpdateUnityPreferences(Enabled);
+                if (VSCode.Debug)
+                {
                     if (Enabled)
                     {
                         UnityEngine.Debug.Log("[VSCode] Integration Enabled");

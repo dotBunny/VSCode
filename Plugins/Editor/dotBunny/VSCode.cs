@@ -283,6 +283,12 @@ namespace dotBunny.Unity
             return -1;
         }
 
+        /// <summary>
+        /// VS Code integration preferences GUI
+        /// </summary>
+        /// <remarks>
+        /// Contains all 3 toggles: Enable/Disable; Debug On/Off; Writing Launch File On/Off
+        /// </remarks>
         [PreferenceItem( "VSCode" )]
         static void IntegrationPreferencesGUI()
         {

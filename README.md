@@ -8,6 +8,10 @@ Many of the hooks used for the automation process are dependant on Unity 5. If t
 #####Visual Studio Code 0.8+
 In version 0.8.0, a directory structure change was made that moved where configuration files were stored by Visual Studio Code. Thusly, the plugin was updated to handle the new structure, however this means that people using versions of Visual Studio Code below 0.8.0 need to go back to a previous release of the [plugin](https://github.com/dotBunny/VSCode/releases/tag/1.6.5), or they can update Visual Studio Code.
 
+######Mono
+A good number of people have needed to install Mono in order for many of the issues with OmniSharp to be resolved.
+I would suggest installing the latest package available at the [Mono Project](http://www.mono-project.com/download/). Don't worry it will not mess with Unity.
+
 ### Installation
 It is important to make sure that the `VSCode.cs` file is placed under an `Editor` folder in the project. An example of this arrangement would be placing the file in `/Assets/Plugins/Editor/dotBunny`.
 

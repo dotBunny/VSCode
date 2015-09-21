@@ -204,7 +204,7 @@ namespace dotBunny.Unity
             proc.StartInfo.UseShellExecute = false;
 #else
             //TODO: Allow for manual path to code?
-            proc.StartInfo.FileName = "/usr/local/bin/code";
+            proc.StartInfo.FileName = "code";
             proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #endif
@@ -284,7 +284,6 @@ namespace dotBunny.Unity
                     }
                 }
             }
-
 #endif
             return -1;
         }
@@ -412,7 +411,8 @@ namespace dotBunny.Unity
                 int port = GetDebugPort();
                 if (port > -1)
                 {
-
+                    if (!Directory.Exists(VSCode.SettingsFolder))
+                        System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);
                     UpdateLaunchFile(port);
 
                     if (VSCode.Debug)
@@ -576,7 +576,7 @@ namespace dotBunny.Unity
             if (enabled)
             {
 #if UNITY_EDITOR_OSX
-                var newPath =  "/Applications/Visual Studio Code.app";
+                var newPath = "/Applications/Visual Studio Code.app";
 #elif UNITY_EDITOR_WIN
                 var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
 #else

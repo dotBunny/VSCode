@@ -16,6 +16,7 @@ namespace dotBunny.Unity
     using System.IO;
     using System.Text.RegularExpressions;
     using UnityEditor;
+    using UnityEngine;
 
     public static class VSCode
     {
@@ -197,7 +198,12 @@ namespace dotBunny.Unity
             proc.StartInfo.FileName = "open";
             proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
             proc.StartInfo.UseShellExecute = false;
+#elif UNITY_EDITOR_WIN
+            proc.StartInfo.FileName = "code";
+            proc.StartInfo.Arguments = args;
+            proc.StartInfo.UseShellExecute = false;
 #else
+            //TODO: Allow for manual path to code?
             proc.StartInfo.FileName = "code";
             proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
@@ -283,15 +289,18 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
-        /// VS Code integration preferences GUI
+        /// VS Code Integration Preferences Item
         /// </summary>
         /// <remarks>
         /// Contains all 3 toggles: Enable/Disable; Debug On/Off; Writing Launch File On/Off
         /// </remarks>
         [PreferenceItem( "VSCode" )]
-        static void IntegrationPreferencesGUI()
+        static void VSCodePreferencesItem()
         {
             EditorGUILayout.BeginVertical();
+
+            EditorGUILayout.HelpBox("Support development of this plugin, follow @reapazor and @dotbunny on Twitter.", MessageType.Info);
+
             EditorGUI.BeginChangeCheck();
 
             Enabled = EditorGUILayout.Toggle("Enable Integration", Enabled);
@@ -305,7 +314,8 @@ namespace dotBunny.Unity
 
             EditorGUI.EndDisabledGroup();
 
-            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+
             if( EditorGUI.EndChangeCheck())
             {
                 UpdateUnityPreferences(Enabled);
@@ -320,16 +330,16 @@ namespace dotBunny.Unity
                     }
                 }
             }
+            
+            if (GUILayout.Button("Write Workspace Settings"))
+            {
+                WriteWorkspaceSettings();
+            }
+            
+            EditorGUILayout.EndVertical();
         }
 
-        [MenuItem("Assets/VS Code/Force Sync Project", false, 201)]
-        public static void MenuForceSyncProject()
-        {
-            // Calling this will then trigger the callback as well;
-            SyncSolution();
-        }
-
-        [MenuItem("Assets/VS Code/Open Project", false, 100)]
+        [MenuItem("Assets/Open C# Project In Code", false, 1000)]
         static void MenuOpenProject()
         {
             // Force the project files to be sync
@@ -338,11 +348,11 @@ namespace dotBunny.Unity
             // Load Project
             CallVSCode("\"" + ProjectPath + "\" -r");
         }
-
-        [MenuItem("Assets/VS Code/Write Workspace Settings", false, 202)]
-        public static void MenuWriteWorkspaceSettings()
+        
+        [MenuItem("Assets/Open C# Project In Code", true, 1000)]
+        static bool ValidateMenuOpenProject()
         {
-            WriteWorkspaceSettings();
+            return Enabled;
         }
 
         /// <summary>
@@ -566,11 +576,11 @@ namespace dotBunny.Unity
             if (enabled)
             {
 #if UNITY_EDITOR_OSX
-                var newPath =  "/Applications/Visual Studio Code.app";
+                var newPath = "/Applications/Visual Studio Code.app";
 #elif UNITY_EDITOR_WIN
                 var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
 #else
-                var newPath =  "/usr/local/bin/code";
+                var newPath = "/usr/local/bin/code";
 #endif
 
                 // App
@@ -650,6 +660,11 @@ namespace dotBunny.Unity
         /// </summary>
         static void WriteWorkspaceSettings()
         {
+            if (Debug)
+            {
+                UnityEngine.Debug.Log("[VSCode] Workspace Settigns Written");
+            }
+                    
             if (!Directory.Exists(VSCode.SettingsFolder))
             {
                 System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);

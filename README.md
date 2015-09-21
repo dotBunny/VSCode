@@ -19,11 +19,11 @@ It is important to make sure that the `VSCode.cs` file is placed under an `Edito
 It's was submitted for review on September 4th, 2015.
 
 ### Usage
-Once the VSCode file is in place, simply navigate your way to the `Assets | VS Code` menu and select the `Enable Integration` option. A check mark will appear beside the option, indicating that its active.
+Once the VSCode file is in place, simply navigate your way to the `Unity Preferences` and select `VSCode` and check the `Enable Integration` option.
 
 That's it! Your ready to go!
 
-OK, so maybe some people need a little video explaining some of the finer details of how to use the plugin. So I shot a [quick video](https://vimeo.com/dotbunny/vscode) that highlights the ups and the downs (like Unity hanging after debugging sometimes) for people to watch.
+OK, so maybe some people need a little video explaining some of the finer details of how to use the plugin. So I shot a [quick video](https://vimeo.com/dotbunny/vscode) that highlights the ups and the downs (like Unity hanging after debugging sometimes) for people to watch. Please note this video is from a previous version of the plugin where things are in the menu, this has changed.
 
 ### Platform Support
 I use the plugin every day on a Mac (so it's battle tested there), and occasionally test it on a Windows VM. As for the recently announced Linux support, it should work just like the Mac version. I'll get around to installing the Linux editor sometime in the near future.

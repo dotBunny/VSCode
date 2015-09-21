@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   1.9
+ *   1.95
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -16,7 +16,6 @@ namespace dotBunny.Unity
     using System.IO;
     using System.Text.RegularExpressions;
     using UnityEditor;
-    using UnityEngine;
 
     public static class VSCode
     {
@@ -292,21 +291,22 @@ namespace dotBunny.Unity
         [PreferenceItem( "VSCode" )]
         static void IntegrationPreferencesGUI()
         {
-            var x = 135f;
-            var y = 50f;
-            GUI.Label( new Rect(x, y,         200, 30), "Enable Integration" );
-            GUI.Label( new Rect(x, y +17,     200, 30), "Log To Console" );
-            GUI.Label( new Rect(x, y +17 +17, 200, 30), "Write Launch File" );
+            EditorGUILayout.BeginVertical();
+            EditorGUI.BeginChangeCheck();
 
-            x = 135f + 180f;
-            var toggleSize = 17f;
-            var savedEnabled = Enabled;
+            Enabled = EditorGUILayout.Toggle("Enable Integration", Enabled);
 
-            Enabled =         GUI.Toggle( new Rect(x, y,         toggleSize, toggleSize), Enabled, "" );
-            Debug =           GUI.Toggle( new Rect(x, y +17,     toggleSize, toggleSize), Debug, "");
-            WriteLaunchFile = GUI.Toggle( new Rect(x, y +17 +17, toggleSize, toggleSize), WriteLaunchFile, "");
+            EditorGUILayout.Space();
 
-            if (Enabled != savedEnabled)
+            EditorGUI.BeginDisabledGroup(!Enabled);
+            Debug = EditorGUILayout.Toggle("Output Messages To Console", Debug);
+
+            WriteLaunchFile = EditorGUILayout.Toggle("Always Write Launch File", WriteLaunchFile);
+
+            EditorGUI.EndDisabledGroup();
+
+            EditorGUILayout.EndVertical();
+            if( EditorGUI.EndChangeCheck())
             {
                 UpdateUnityPreferences(Enabled);
                 if (VSCode.Debug)

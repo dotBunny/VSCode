@@ -198,8 +198,13 @@ namespace dotBunny.Unity
             proc.StartInfo.FileName = "open";
             proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
             proc.StartInfo.UseShellExecute = false;
-#else
+#elif UNITY_EDITOR_WIN
             proc.StartInfo.FileName = "code";
+            proc.StartInfo.Arguments = args;
+            proc.StartInfo.UseShellExecute = false;
+#else
+            //TODO: Allow for manual path to code?
+            proc.StartInfo.FileName = "/usr/local/bin/code";
             proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #endif
@@ -212,36 +217,7 @@ namespace dotBunny.Unity
         /// </summary>
         static int GetDebugPort()
         {
-#if UNITY_EDITOR_OSX
-            System.Diagnostics.Process process = new System.Diagnostics.Process ();
-            process.StartInfo.FileName = "lsof";
-            process.StartInfo.Arguments = "-c /^Unity$/ -i 4tcp -a";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.Start ();
-
-            // Not thread safe (yet!)
-            string output = process.StandardOutput.ReadToEnd ();
-            string[] lines = output.Split ('\n');
-
-            process.WaitForExit ();
-
-            foreach (string line in lines) {
-                int port = -1;
-                if (line.StartsWith ("Unity")) {
-                    string[] portions = line.Split (new string[] { "TCP *:" }, System.StringSplitOptions.None);
-                    if (portions.Length >= 2) {
-                        Regex digitsOnly = new Regex (@"[^\d]");
-                        string cleanPort = digitsOnly.Replace (portions [1], "");
-                        if (int.TryParse (cleanPort, out port)) {
-                            if (port > -1) {
-                                return port;
-                            }
-                        }
-                    }
-                }
-            }
-#else
+#if UNITY_EDITOR_WIN
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             process.StartInfo.FileName = "netstat";
             process.StartInfo.Arguments = "-a -n -o -p TCP";
@@ -279,6 +255,36 @@ namespace dotBunny.Unity
                     }
                 }
             }
+#else
+            System.Diagnostics.Process process = new System.Diagnostics.Process ();
+            process.StartInfo.FileName = "lsof";
+            process.StartInfo.Arguments = "-c /^Unity$/ -i 4tcp -a";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.Start ();
+
+            // Not thread safe (yet!)
+            string output = process.StandardOutput.ReadToEnd ();
+            string[] lines = output.Split ('\n');
+
+            process.WaitForExit ();
+
+            foreach (string line in lines) {
+                int port = -1;
+                if (line.StartsWith ("Unity")) {
+                    string[] portions = line.Split (new string[] { "TCP *:" }, System.StringSplitOptions.None);
+                    if (portions.Length >= 2) {
+                        Regex digitsOnly = new Regex (@"[^\d]");
+                        string cleanPort = digitsOnly.Replace (portions [1], "");
+                        if (int.TryParse (cleanPort, out port)) {
+                            if (port > -1) {
+                                return port;
+                            }
+                        }
+                    }
+                }
+            }
+
 #endif
             return -1;
         }
@@ -571,8 +577,10 @@ namespace dotBunny.Unity
             {
 #if UNITY_EDITOR_OSX
                 var newPath =  "/Applications/Visual Studio Code.app";
-#else
+#elif UNITY_EDITOR_WIN
                 var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
+#else
+                var newPath = "/usr/local/bin/code";
 #endif
 
                 // App

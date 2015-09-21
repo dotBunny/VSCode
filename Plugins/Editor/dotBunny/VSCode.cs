@@ -3,7 +3,7 @@
  *
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
- * Version: 
+ * Version:
  *   1.9
  *
  * Authors:
@@ -16,6 +16,7 @@ namespace dotBunny.Unity
     using System.IO;
     using System.Text.RegularExpressions;
     using UnityEditor;
+    using UnityEngine;
 
     public static class VSCode
     {
@@ -71,7 +72,7 @@ namespace dotBunny.Unity
                 EditorPrefs.SetBool("VSCode_WriteLaunchFile", value);
             }
         }
-        
+
         /// <summary>
         /// Quick reference to the VSCode settings folder
         /// </summary>
@@ -112,8 +113,8 @@ namespace dotBunny.Unity
                 return SettingsFolder + System.IO.Path.DirectorySeparatorChar + "settings.json";
             }
         }
-        
-        
+
+
 
         #endregion
 
@@ -127,7 +128,7 @@ namespace dotBunny.Unity
                 UpdateUnityPreferences(true);
             }
         }
-        
+
 
         #region Public Members
 
@@ -213,33 +214,33 @@ namespace dotBunny.Unity
         {
 #if UNITY_EDITOR_OSX
             System.Diagnostics.Process process = new System.Diagnostics.Process ();
-			process.StartInfo.FileName = "lsof";
-			process.StartInfo.Arguments = "-c /^Unity$/ -i 4tcp -a";
-			process.StartInfo.UseShellExecute = false;
-			process.StartInfo.RedirectStandardOutput = true;
-			process.Start ();
+            process.StartInfo.FileName = "lsof";
+            process.StartInfo.Arguments = "-c /^Unity$/ -i 4tcp -a";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.Start ();
 
-			// Not thread safe (yet!)
-			string output = process.StandardOutput.ReadToEnd ();
-			string[] lines = output.Split ('\n');
-            
-			process.WaitForExit ();
-            
-			foreach (string line in lines) {
-				int port = -1;
-				if (line.StartsWith ("Unity")) {
-					string[] portions = line.Split (new string[] { "TCP *:" }, System.StringSplitOptions.None);
-					if (portions.Length >= 2) {
-						Regex digitsOnly = new Regex (@"[^\d]");
-						string cleanPort = digitsOnly.Replace (portions [1], "");
-						if (int.TryParse (cleanPort, out port)) {
-							if (port > -1) {
-								return port;
-							}
-						}
-					}
-				}
-			}
+            // Not thread safe (yet!)
+            string output = process.StandardOutput.ReadToEnd ();
+            string[] lines = output.Split ('\n');
+
+            process.WaitForExit ();
+
+            foreach (string line in lines) {
+                int port = -1;
+                if (line.StartsWith ("Unity")) {
+                    string[] portions = line.Split (new string[] { "TCP *:" }, System.StringSplitOptions.None);
+                    if (portions.Length >= 2) {
+                        Regex digitsOnly = new Regex (@"[^\d]");
+                        string cleanPort = digitsOnly.Replace (portions [1], "");
+                        if (int.TryParse (cleanPort, out port)) {
+                            if (port > -1) {
+                                return port;
+                            }
+                        }
+                    }
+                }
+            }
 #else
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             process.StartInfo.FileName = "netstat";
@@ -282,36 +283,43 @@ namespace dotBunny.Unity
             return -1;
         }
 
-        [MenuItem("Assets/VS Code/Additional Options/Log To Console")]
-        static void MenuEnableDebug()
+        /// <summary>
+        /// VS Code integration preferences GUI
+        /// </summary>
+        /// <remarks>
+        /// Contains all 3 toggles: Enable/Disable; Debug On/Off; Writing Launch File On/Off
+        /// </remarks>
+        [PreferenceItem( "VSCode" )]
+        static void IntegrationPreferencesGUI()
         {
-            Menu.SetChecked("Assets/VS Code/Additional Options/Log To Console", !Debug);
-            Debug = !Debug;
-        }
+            var x = 135f;
+            var y = 50f;
+            GUI.Label( new Rect(x, y,         200, 30), "Enable Integration" );
+            GUI.Label( new Rect(x, y +17,     200, 30), "Log To Console" );
+            GUI.Label( new Rect(x, y +17 +17, 200, 30), "Write Launch File" );
 
-        [MenuItem("Assets/VS Code/Enable Integration")]
-        static void MenuEnableIntegration()
-        {
-            Menu.SetChecked("Assets/VS Code/Enable Integration", !Enabled);
-            Enabled = !Enabled;
+            x = 135f + 180f;
+            var toggleSize = 17f;
+            var savedEnabled = Enabled;
 
-            UpdateUnityPreferences(Enabled);
-            
-             if ( VSCode.Debug ) {
-                if (Enabled)
+            Enabled =         GUI.Toggle( new Rect(x, y,         toggleSize, toggleSize), Enabled, "" );
+            Debug =           GUI.Toggle( new Rect(x, y +17,     toggleSize, toggleSize), Debug, "");
+            WriteLaunchFile = GUI.Toggle( new Rect(x, y +17 +17, toggleSize, toggleSize), WriteLaunchFile, "");
+
+            if (Enabled != savedEnabled)
+            {
+                UpdateUnityPreferences(Enabled);
+                if (VSCode.Debug)
                 {
-                    UnityEngine.Debug.Log("[VSCode] Integration Enabled");
-                } else {
-                    UnityEngine.Debug.Log("[VSCode] Integration Disabled");
+                    if (Enabled)
+                    {
+                        UnityEngine.Debug.Log("[VSCode] Integration Enabled");
+                    }
+                    else {
+                        UnityEngine.Debug.Log("[VSCode] Integration Disabled");
+                    }
                 }
             }
-        }
-        
-        [MenuItem("Assets/VS Code/Additional Options/Write Launch File")]
-        static void MenuEnableWriteLaunchFile()
-        {
-            Menu.SetChecked("Assets/VS Code/Additional Options/Write Launch File", !WriteLaunchFile);
-            WriteLaunchFile = !WriteLaunchFile;
         }
 
         [MenuItem("Assets/VS Code/Force Sync Project", false, 201)]
@@ -326,39 +334,9 @@ namespace dotBunny.Unity
         {
             // Force the project files to be sync
             SyncSolution();
-            
+
             // Load Project
             CallVSCode("\"" + ProjectPath + "\" -r");
-        }
-
-        /// <summary>
-        /// Update "Log To Console" menu item
-        /// </summary>
-        [MenuItem("Assets/VS Code/Additional Options/Log To Console", true, 220)]
-        static bool MenuValidateMenuEnableDebug()
-        {
-            Menu.SetChecked("Assets/VS Code/Additional Options/Log To Console", Debug);
-            return true;
-        }
-        /// <summary>
-        /// Update "Write Launch File" menu item
-        /// </summary>
-        [MenuItem("Assets/VS Code/Additional Options/Write Launch File", true, 223)]
-        static bool MenuValidateMenuEnableWriteLaunchFile()
-        {
-            Menu.SetChecked("Assets/VS Code/Additional Options/Write Launch File", WriteLaunchFile);
-            return true;
-        }
-
-
-        /// <summary>
-        /// Update "Enable Integration" menu item
-        /// </summary>
-        [MenuItem("Assets/VS Code/Enable Integration", true, 300)]
-        static bool MenuValidateMenuEnableIntegration()
-        {
-            Menu.SetChecked("Assets/VS Code/Enable Integration", Enabled);
-            return true;
         }
 
         [MenuItem("Assets/VS Code/Write Workspace Settings", false, 202)]
@@ -395,7 +373,7 @@ namespace dotBunny.Unity
                 string args = null;
                 if (line == -1)
                 {
-                    
+
                     args = "\"" + ProjectPath + "\" \"" + completeFilepath + "\" -r";
                 }
                 else
@@ -474,7 +452,7 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
-        /// Remove extra/erroneous data from project file (content). 
+        /// Remove extra/erroneous data from project file (content).
         /// </summary>
         static string ScrubProjectContent(string content)
         {
@@ -549,7 +527,7 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
-        /// Remove extra/erroneous data from solution file (content). 
+        /// Remove extra/erroneous data from solution file (content).
         /// </summary>
         static string ScrubSolutionContent(string content)
         {
@@ -587,7 +565,7 @@ namespace dotBunny.Unity
             if (enabled)
             {
 #if UNITY_EDITOR_OSX
-                var newPath =  "/Applications/Visual Studio Code.app";  
+                var newPath =  "/Applications/Visual Studio Code.app";
 #else
                 var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
 #endif

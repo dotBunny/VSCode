@@ -85,8 +85,8 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
-		/// Should the plugin automatically update itself.
-		/// </summary>
+        /// Should the plugin automatically update itself.
+        /// </summary>
         static bool AutomaticUpdates
         {
             get
@@ -105,15 +105,15 @@ namespace dotBunny.Unity
             {
                 return EditorPrefs.GetFloat("VSCode_GitHubVersion", Version);
             }
-            se
-           t {
+            set
+            {
                 EditorPrefs.SetFloat("VSCode_GitHubVersion", value);
             }
         }
 
         /// <summary>
-		/// When was the last time that the plugin was updated?
-		/// </summary>
+        /// When was the last time that the plugin was updated?
+        /// </summary>
         static DateTime LastUpdate
         {
             get
@@ -173,22 +173,6 @@ namespace dotBunny.Unity
             }
         }
 
-        static string PluginFile
-        {
-            get
-            {
-                return PluginFolder + System.IO.Path.DirectorySeparatorChar + "VSCode.cs";
-            }
-        }
-
-        static string PluginFolder
-        {
-            get
-            {
-                return Application.dataPath + System.IO.Path.DirectorySeparatorChar + "Plugins" + System.IO.Path.DirectorySeparatorChar + "Editor" + System.IO.Path.DirectorySeparatorChar + "dotBunny";
-            }
-        }
-
         /// <summary>
         /// Quick reference to the VSCode settings folder
         /// </summary>
@@ -232,7 +216,7 @@ namespace dotBunny.Unity
             {
                 UpdateUnityPreferences(true);
 
-
+                // Handle Moving To New Folder
                 if (MoveToFolderAutomatically)
                 {
                     if (CheckFileLocation())
@@ -255,71 +239,6 @@ namespace dotBunny.Unity
             //System.AppDomain.CurrentDomain.DomainUnload += System_AppDomain_CurrentDomain_DomainUnload;
         }
 
-        static bool CheckFileLocation()
-        {
-            var GUIDs = AssetDatabase.FindAssets("t:Script VSCode");
-
-            // There really should ONLY be one ... 
-            if (AssetDatabase.GUIDToAssetPath(GUIDs[0]) != "Assets/Plugins/Editor/dotBunny/VSCode.cs")
-            {
-                AssetDatabase.CreateFolder("Assets", "Plugins");
-                AssetDatabase.CreateFolder("Assets/Plugins", "Editor");
-                AssetDatabase.CreateFolder("Assets/Plugins/Editor", "dotBunny");
-
-                string message = AssetDatabase.MoveAsset(AssetDatabase.GUIDToAssetPath(GUIDs[0]), "Assets/Plugins/Editor/dotBunny/VSCode.cs");
-                if (!string.IsNullOrEmpty(message) && Debug)
-                {
-                    UnityEngine.Debug.Log("[VSCode] Failed To Move File: " + message);
-                }
-                else
-                {
-                    // If we've moved the file we probable do not want to run updates
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        static void CheckForUpdate()
-        {
-            var fileContent = string.Empty;
-
-            EditorUtility.DisplayProgressBar("VSCode", "Checking for updates ...", 0.5f);
-
-            // Because were not a runtime framework, lets just use the simplest way of doing this
-            // TODO: Change this when its in the right spot on the repo (no more folders)
-            using (var webClient = new System.Net.WebClient())
-            {
-                fileContent = webClient.DownloadString("https://raw.githubusercontent.com/dotBunny/VSCode/master/VSCode.cs");
-            }
-
-            // Set the last update time
-            LastUpdate = DateTime.Now;
-
-            EditorUtility.ClearProgressBar();
-
-            string[] fileExploded = fileContent.Split('\n');
-            if (fileExploded.Length > 7)
-            {
-                float github = Version;
-                if (float.TryParse(fileExploded[6].Replace("*", "").Trim(), out github))
-                {
-                    GitHubVersion = github;
-                }
-
-                if (github > Version)
-                {
-                    var GUIDs = AssetDatabase.FindAssets("t:Script VSCode");
-                    var path = Application.dataPath.Substring(0, Application.dataPath.Length - "/Assets".Length) + System.IO.Path.DirectorySeparatorChar +
-                    AssetDatabase.GUIDToAssetPath(GUIDs[0]).Replace('/', System.IO.Path.DirectorySeparatorChar);
-
-                    if (EditorUtility.DisplayDialog("VSCode Update", "A newer version of the VSCode plugin is available, would you like to update your version?", "Yes", "No"))
-                    {
-                        File.WriteAllText(path, fileContent);
-                    }
-                }
-            }
-        }
 
         //  static void System_AppDomain_CurrentDomain_DomainUnload (object sender, System.EventArgs e)
         //  {
@@ -342,13 +261,6 @@ namespace dotBunny.Unity
             System.Reflection.MethodInfo SyncSolution = T.GetMethod("SyncSolution", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             SyncSolution.Invoke(null, null);
 
-        }
-
-        static void ForceUnityPreferencesWindowRead()
-        {
-            //System.Type T = System.Type.GetType ("UnityEditor.PreferencesWindow,UnityEditor");
-            ///System.Reflection.MethodInfo PreferencesWindoW = T.GetMethod ("ReadPreferences", System.Reflection.BindingFlags.p | System.Reflection.BindingFlags.Static);
-            //SyncSolution.Invoke (null, null);
         }
 
         /// <summary>
@@ -417,7 +329,87 @@ namespace dotBunny.Unity
             proc.StartInfo.RedirectStandardOutput = true;
             proc.Start();
         }
+        
+        /// <summary>
+        /// Check if the file is in the right location, and if we want to move it.
+        /// </summary>
+        static bool CheckFileLocation()
+        {
+            var GUIDs = AssetDatabase.FindAssets("t:Script VSCode");
 
+            // There really should ONLY be one ... 
+            if (AssetDatabase.GUIDToAssetPath(GUIDs[0]) != "Assets/Plugins/Editor/dotBunny/VSCode.cs")
+            {
+                AssetDatabase.CreateFolder("Assets", "Plugins");
+                AssetDatabase.CreateFolder("Assets/Plugins", "Editor");
+                AssetDatabase.CreateFolder("Assets/Plugins/Editor", "dotBunny");
+
+                string message = AssetDatabase.MoveAsset(AssetDatabase.GUIDToAssetPath(GUIDs[0]), "Assets/Plugins/Editor/dotBunny/VSCode.cs");
+                if (!string.IsNullOrEmpty(message) && Debug)
+                {
+                    UnityEngine.Debug.Log("[VSCode] Failed To Move File: " + message);
+                }
+                else
+                {
+                    // If we've moved the file we probable do not want to run updates
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Check for Updates with GitHub
+        /// </summary>
+        static void CheckForUpdate()
+        {
+            var fileContent = string.Empty;
+
+            EditorUtility.DisplayProgressBar("VSCode", "Checking for updates ...", 0.5f);
+
+            // Because were not a runtime framework, lets just use the simplest way of doing this
+            try
+            {
+                using (var webClient = new System.Net.WebClient())
+                {
+                    fileContent = webClient.DownloadString("https://raw.githubusercontent.com/dotBunny/VSCode/master/VSCode.cs");
+                }
+            }
+            catch (Exception e) {
+                if ( Debug ) {
+                    UnityEngine.Debug.Log("[VSCode] " + e.Message);
+                }
+            }
+            finally {
+                EditorUtility.ClearProgressBar();    
+            }
+
+            // Set the last update time
+            LastUpdate = DateTime.Now;
+
+            string[] fileExploded = fileContent.Split('\n');
+            if (fileExploded.Length > 7)
+            {
+                float github = Version;
+                if (float.TryParse(fileExploded[6].Replace("*", "").Trim(), out github))
+                {
+                    GitHubVersion = github;
+                }
+
+                if (github > Version)
+                {
+                    var GUIDs = AssetDatabase.FindAssets("t:Script VSCode");
+                    var path = Application.dataPath.Substring(0, Application.dataPath.Length - "/Assets".Length) + System.IO.Path.DirectorySeparatorChar +
+                    AssetDatabase.GUIDToAssetPath(GUIDs[0]).Replace('/', System.IO.Path.DirectorySeparatorChar);
+
+                    if (EditorUtility.DisplayDialog("VSCode Update", "A newer version of the VSCode plugin is available, would you like to update your version?", "Yes", "No"))
+                    {
+                        File.WriteAllText(path, fileContent);
+                    }
+                }
+            }
+        }
+        
         /// <summary>
         /// Determine what port Unity is listening for on Windows
         /// </summary>
@@ -497,6 +489,14 @@ namespace dotBunny.Unity
             }
 #endif
             return -1;
+        }
+
+
+        static void ForceUnityPreferencesWindowRead()
+        {
+            //System.Type T = System.Type.GetType ("UnityEditor.PreferencesWindow,UnityEditor");
+            ///System.Reflection.MethodInfo PreferencesWindoW = T.GetMethod ("ReadPreferences", System.Reflection.BindingFlags.p | System.Reflection.BindingFlags.Static);
+            //SyncSolution.Invoke (null, null);
         }
 
         /// <summary>
@@ -598,21 +598,21 @@ namespace dotBunny.Unity
 
         }
 
-        [MenuItem("Assets/Open C# Project In Code", false, 1000)]
-        static void MenuOpenProject()
-        {
-            // Force the project files to be sync
-            SyncSolution();
+        //  [MenuItem("Assets/Open C# Project In Code", false, 1000)]
+        //  static void MenuOpenProject()
+        //  {
+        //      // Force the project files to be sync
+        //      SyncSolution();
 
-            // Load Project
-            CallVSCode("\"" + ProjectPath + "\" -r");
-        }
+        //      // Load Project
+        //      CallVSCode("\"" + ProjectPath + "\" -r");
+        //  }
 
-        [MenuItem("Assets/Open C# Project In Code", true, 1000)]
-        static bool ValidateMenuOpenProject()
-        {
-            return Enabled;
-        }
+        //  [MenuItem("Assets/Open C# Project In Code", true, 1000)]
+        //  static bool ValidateMenuOpenProject()
+        //  {
+        //      return Enabled;
+        //  }
 
         /// <summary>
         /// Asset Open Callback (from Unity)
@@ -936,6 +936,9 @@ namespace dotBunny.Unity
                 // Hidden Files
                 "\t\t\"**/.DS_Store\":true,\n" +
                 "\t\t\"**/.git\":true,\n" +
+                "\t\t\"**/.gitignore\":true,\n" +
+                "\t\t\"**/.gitmodules\":true,\n" +
+                
 
                 // Project Files
                 "\t\t\"**/*.booproj\":true,\n" +

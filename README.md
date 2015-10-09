@@ -16,7 +16,7 @@ I would suggest installing the latest package available at the [Mono Project](ht
 It is important to make sure that the `VSCode.cs` file is placed under an `Editor` folder in the project. An example of this arrangement would be placing the file in `/Assets/Plugins/Editor/dotBunny`.
 
 ### Unity Asset Store Package
-It's was submitted for review on September 4th, 2015.
+A UAS packaged version of the plugin is [available](http://u3d.as/jmM) for your consumption.
 
 ### Usage
 Once the VSCode file is in place, simply navigate your way to the `Unity Preferences` and select `VSCode` and check the `Enable Integration` option.

@@ -329,7 +329,7 @@ namespace dotBunny.Unity
             proc.StartInfo.RedirectStandardOutput = true;
             proc.Start();
         }
-        
+
         /// <summary>
         /// Check if the file is in the right location, and if we want to move it.
         /// </summary>
@@ -337,7 +337,7 @@ namespace dotBunny.Unity
         {
             var GUIDs = AssetDatabase.FindAssets("t:Script VSCode");
 
-            // There really should ONLY be one ... 
+            // There really should ONLY be one ...
             if (AssetDatabase.GUIDToAssetPath(GUIDs[0]) != "Assets/Plugins/Editor/dotBunny/VSCode.cs")
             {
                 AssetDatabase.CreateFolder("Assets", "Plugins");
@@ -375,13 +375,16 @@ namespace dotBunny.Unity
                     fileContent = webClient.DownloadString("https://raw.githubusercontent.com/dotBunny/VSCode/master/VSCode.cs");
                 }
             }
-            catch (Exception e) {
-                if ( Debug ) {
+            catch (Exception e)
+            {
+                if (Debug)
+                {
                     UnityEngine.Debug.Log("[VSCode] " + e.Message);
                 }
             }
-            finally {
-                EditorUtility.ClearProgressBar();    
+            finally
+            {
+                EditorUtility.ClearProgressBar();
             }
 
             // Set the last update time
@@ -409,7 +412,40 @@ namespace dotBunny.Unity
                 }
             }
         }
-        
+
+        /// <summary>
+        /// Force Unity Preferences Window To Read From Settings
+        /// </summary>
+        static void ForceUnityPreferencesWindowRead()
+        {
+            // I want that window, please and thank you
+            System.Type T = System.Type.GetType("UnityEditor.PreferencesWindow,UnityEditor");
+
+            // Get a reference to the preferences window for the WIN!
+            var window = EditorWindow.GetWindow(T);
+
+            if (window == null)
+            {
+                if (Debug)
+                {
+                    UnityEngine.Debug.Log("[VSCode] No Preferences Window Found");
+                }
+                return;
+            }
+
+            var invokerType = window.GetType();
+            var invokerMethod = invokerType.GetMethod("ReadPreferences", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (invokerMethod != null)
+            {
+                invokerMethod.Invoke(window, null);
+            }
+            else if (Debug)
+            {
+                UnityEngine.Debug.Log("[VSCode] No Reflection Method Found For Preferences");
+            }
+        }
+
         /// <summary>
         /// Determine what port Unity is listening for on Windows
         /// </summary>
@@ -492,12 +528,6 @@ namespace dotBunny.Unity
         }
 
 
-        static void ForceUnityPreferencesWindowRead()
-        {
-            //System.Type T = System.Type.GetType ("UnityEditor.PreferencesWindow,UnityEditor");
-            ///System.Reflection.MethodInfo PreferencesWindoW = T.GetMethod ("ReadPreferences", System.Reflection.BindingFlags.p | System.Reflection.BindingFlags.Static);
-            //SyncSolution.Invoke (null, null);
-        }
 
         /// <summary>
         /// VS Code Integration Preferences Item
@@ -544,6 +574,8 @@ namespace dotBunny.Unity
             if (EditorGUI.EndChangeCheck())
             {
                 UpdateUnityPreferences(Enabled);
+
+//UnityEditor.PreferencesWindow.Read
 
                 // TODO: Force Unity To Reload Preferences
                 // This seems to be a hick up / issue
@@ -912,6 +944,7 @@ namespace dotBunny.Unity
                     EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", false);
                 }
             }
+            ForceUnityPreferencesWindowRead();
         }
 
         /// <summary>
@@ -938,7 +971,7 @@ namespace dotBunny.Unity
                 "\t\t\"**/.git\":true,\n" +
                 "\t\t\"**/.gitignore\":true,\n" +
                 "\t\t\"**/.gitmodules\":true,\n" +
-                
+
 
                 // Project Files
                 "\t\t\"**/*.booproj\":true,\n" +

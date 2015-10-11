@@ -416,34 +416,47 @@ namespace dotBunny.Unity
         /// <summary>
         /// Force Unity Preferences Window To Read From Settings
         /// </summary>
-        static void ForceUnityPreferencesWindowRead()
+        static void FixUnityPreferences()
         {
             // I want that window, please and thank you
             System.Type T = System.Type.GetType("UnityEditor.PreferencesWindow,UnityEditor");
 
-            // Get a reference to the preferences window for the WIN!
-            var window = EditorWindow.GetWindow(T);
+            if ( EditorWindow.focusedWindow == null ) return;
+            
+            // Only run this when the editor window is visible (cause its what screwed us up)
+            if (EditorWindow.focusedWindow.GetType() == T) {
+                var window = EditorWindow.GetWindow(T, true, "Unity Preferences");
+                
 
-            if (window == null)
-            {
-                if (Debug)
+                if (window == null)
                 {
-                    UnityEngine.Debug.Log("[VSCode] No Preferences Window Found");
+                    if (Debug)
+                    {
+                        UnityEngine.Debug.Log("[VSCode] No Preferences Window Found (really?)");
+                    }
+                    return;
                 }
-                return;
-            }
 
-            var invokerType = window.GetType();
-            var invokerMethod = invokerType.GetMethod("ReadPreferences", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var invokerType = window.GetType();
+                var invokerMethod = invokerType.GetMethod("ReadPreferences", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            if (invokerMethod != null)
-            {
-                invokerMethod.Invoke(window, null);
+                if (invokerMethod != null)
+                {
+                    invokerMethod.Invoke(window, null);
+                }
+                else if (Debug)
+                {
+                    UnityEngine.Debug.Log("[VSCode] No Reflection Method Found For Preferences");
+                }    
             }
-            else if (Debug)
-            {
-                UnityEngine.Debug.Log("[VSCode] No Reflection Method Found For Preferences");
-            }
+            
+            //  // Get internal integration class
+            //  System.Type iT = System.Type.GetType("UnityEditor.VisualStudioIntegration.UnityVSSupport,UnityEditor.VisualStudioIntegration");
+            //  var iinvokerMethod = iT.GetMethod("ScriptEditorChanged", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            //  var temp = EditorPrefs.GetString("kScriptsDefaultApp");
+            //  iinvokerMethod.Invoke(null,new object[] { temp } );
+
         }
 
         /// <summary>
@@ -527,7 +540,22 @@ namespace dotBunny.Unity
             return -1;
         }
 
+        // HACK: This is in until Unity can figure out why MD keeps opening even though a different program is selected.
+        [MenuItem("Assets/Open C# Project In Code", false, 1000)]
+        static void MenuOpenProject()
+        {
+            // Force the project files to be sync
+            SyncSolution();
 
+            // Load Project
+            CallVSCode("\"" + ProjectPath + "\" -r");
+        }
+        
+        [MenuItem("Assets/Open C# Project In Code", true, 1000)]
+        static bool ValidateMenuOpenProject()
+        {
+            return Enabled;
+        }
 
         /// <summary>
         /// VS Code Integration Preferences Item
@@ -629,23 +657,7 @@ namespace dotBunny.Unity
             EditorGUILayout.EndVertical();
 
         }
-
-        //  [MenuItem("Assets/Open C# Project In Code", false, 1000)]
-        //  static void MenuOpenProject()
-        //  {
-        //      // Force the project files to be sync
-        //      SyncSolution();
-
-        //      // Load Project
-        //      CallVSCode("\"" + ProjectPath + "\" -r");
-        //  }
-
-        //  [MenuItem("Assets/Open C# Project In Code", true, 1000)]
-        //  static bool ValidateMenuOpenProject()
-        //  {
-        //      return Enabled;
-        //  }
-
+        
         /// <summary>
         /// Asset Open Callback (from Unity)
         /// </summary>
@@ -888,6 +900,8 @@ namespace dotBunny.Unity
                 }
 
                 EditorPrefs.SetString("kScriptEditorArgs", "-r -g \"$(File):$(Line)\"");
+                EditorPrefs.SetString("kScriptEditorArgs" + newPath, "-r -g \"$(File):$(Line)\"");
+	
 
                 // MonoDevelop Solution
                 if (EditorPrefs.GetBool("kMonoDevelopSolutionProperties", false))
@@ -944,7 +958,8 @@ namespace dotBunny.Unity
                     EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", false);
                 }
             }
-            ForceUnityPreferencesWindowRead();
+            
+            FixUnityPreferences();
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ A good number of people have needed to install Mono in order for many of the iss
 I would suggest installing the latest package available at the [Mono Project](http://www.mono-project.com/download/). Don't worry it will not mess with Unity.
 
 ### Installation
-It is important to make sure that the `VSCode.cs` file is placed under an `Editor` folder in the project. An example of this arrangement would be placing the file in `/Assets/Plugins/Editor/dotBunny`.
+It is important to make sure that the `VSCode.cs` file is placed under an `Editor` folder in the project. An example of this arrangement would be placing the file in `/Assets/Plugins/Editor/VSCode.cs`. By default it has its own folder structure which does this for you.
 
 ### Unity Asset Store Package
 A UAS packaged version of the plugin is [available](http://u3d.as/jmM) for your consumption.

@@ -24,7 +24,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Current Version Number
         /// </summary
-        public const float Version = 2.0f;
+        public const float Version = 2.1f;
 
         /// <summary>
         /// Current Version Code

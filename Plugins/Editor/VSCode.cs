@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   2.0
+ *   2.1
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -145,24 +145,6 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
-        /// Should the plugin automaticly move itself to the /Plugins/Editor folder
-        /// </summary>
-        /// <remarks>
-        /// This should cleanup the install of the plugin and make it even easier for people to use.
-        /// </remarks>
-        static bool MoveToFolderAutomatically
-        {
-            get
-            {
-                return EditorPrefs.GetBool("VSCode_MoveToFolderAutomatically", true);
-            }
-            set
-            {
-                EditorPrefs.SetBool("VSCode_MoveToFolderAutomatically", value);
-            }
-        }
-
-        /// <summary>
         /// The full path to the project
         /// </summary>
         static string ProjectPath
@@ -211,19 +193,10 @@ namespace dotBunny.Unity
         /// Integration Constructor
         /// </summary>
         static VSCode()
-        {
+        {            
             if (Enabled)
             {
                 UpdateUnityPreferences(true);
-
-                // Handle Moving To New Folder
-                if (MoveToFolderAutomatically)
-                {
-                    if (CheckFileLocation())
-                    {
-                        return;
-                    }
-                }
 
                 // Add Update Check
                 DateTime targetDate = LastUpdate.AddDays(UpdateTime);
@@ -267,7 +240,8 @@ namespace dotBunny.Unity
         /// Update the solution files so that they work with VS Code
         /// </summary>
         public static void UpdateSolution()
-        {
+        { 
+            
             // No need to process if we are not enabled
             if (!VSCode.Enabled)
             {
@@ -287,7 +261,9 @@ namespace dotBunny.Unity
             {
                 string content = File.ReadAllText(filePath);
                 content = ScrubSolutionContent(content);
+
                 File.WriteAllText(filePath, content);
+
                 ScrubFile(filePath);
             }
 
@@ -295,7 +271,9 @@ namespace dotBunny.Unity
             {
                 string content = File.ReadAllText(filePath);
                 content = ScrubProjectContent(content);
+
                 File.WriteAllText(filePath, content);
+
                 ScrubFile(filePath);
             }
 
@@ -331,34 +309,6 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
-        /// Check if the file is in the right location, and if we want to move it.
-        /// </summary>
-        static bool CheckFileLocation()
-        {
-            var GUIDs = AssetDatabase.FindAssets("t:Script VSCode");
-
-            // There really should ONLY be one ...
-            if (AssetDatabase.GUIDToAssetPath(GUIDs[0]) != "Assets/Plugins/Editor/dotBunny/VSCode.cs")
-            {
-                AssetDatabase.CreateFolder("Assets", "Plugins");
-                AssetDatabase.CreateFolder("Assets/Plugins", "Editor");
-                AssetDatabase.CreateFolder("Assets/Plugins/Editor", "dotBunny");
-
-                string message = AssetDatabase.MoveAsset(AssetDatabase.GUIDToAssetPath(GUIDs[0]), "Assets/Plugins/Editor/dotBunny/VSCode.cs");
-                if (!string.IsNullOrEmpty(message) && Debug)
-                {
-                    UnityEngine.Debug.Log("[VSCode] Failed To Move File: " + message);
-                }
-                else
-                {
-                    // If we've moved the file we probable do not want to run updates
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
         /// Check for Updates with GitHub
         /// </summary>
         static void CheckForUpdate()
@@ -372,7 +322,7 @@ namespace dotBunny.Unity
             {
                 using (var webClient = new System.Net.WebClient())
                 {
-                    fileContent = webClient.DownloadString("https://raw.githubusercontent.com/dotBunny/VSCode/master/VSCode.cs");
+                    fileContent = webClient.DownloadString("https://raw.githubusercontent.com/dotBunny/VSCode/master/Plugins/Editor/VSCode.cs");
                 }
             }
             catch (Exception e)
@@ -582,8 +532,6 @@ namespace dotBunny.Unity
 
             WriteLaunchFile = EditorGUILayout.Toggle(new GUIContent("Always Write Launch File", "Always write the launch.json settings when entering play mode?"), WriteLaunchFile);
 
-            MoveToFolderAutomatically = EditorGUILayout.Toggle(new GUIContent("Move To Folder Automatically", "Should the plugin automatically move itself to the appropriate folder?"), MoveToFolderAutomatically);
-
             EditorGUILayout.Space();
 
             AutomaticUpdates = EditorGUILayout.Toggle(new GUIContent("Automatic Updates", "Should the plugin automatically update itself?"), AutomaticUpdates);
@@ -617,15 +565,6 @@ namespace dotBunny.Unity
                     else
                     {
                         UnityEngine.Debug.Log("[VSCode] Integration Disabled");
-                    }
-                }
-
-                if (MoveToFolderAutomatically)
-                {
-                    if (CheckFileLocation())
-                    {
-                        EditorGUILayout.EndVertical();
-                        return;
                     }
                 }
             }

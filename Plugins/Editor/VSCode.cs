@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   2.1
+ *   2.2
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -193,7 +193,7 @@ namespace dotBunny.Unity
         /// Integration Constructor
         /// </summary>
         static VSCode()
-        {            
+        {
             if (Enabled)
             {
                 UpdateUnityPreferences(true);
@@ -240,8 +240,8 @@ namespace dotBunny.Unity
         /// Update the solution files so that they work with VS Code
         /// </summary>
         public static void UpdateSolution()
-        { 
-            
+        {
+
             // No need to process if we are not enabled
             if (!VSCode.Enabled)
             {
@@ -291,9 +291,9 @@ namespace dotBunny.Unity
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
 
 #if UNITY_EDITOR_OSX
-			proc.StartInfo.FileName = "open";
-			proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
-			proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.FileName = "open";
+            proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
+            proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
             proc.StartInfo.FileName = "code";
             proc.StartInfo.Arguments = args;
@@ -353,7 +353,7 @@ namespace dotBunny.Unity
                 {
                     var GUIDs = AssetDatabase.FindAssets("t:Script VSCode");
                     var path = Application.dataPath.Substring(0, Application.dataPath.Length - "/Assets".Length) + System.IO.Path.DirectorySeparatorChar +
-                    AssetDatabase.GUIDToAssetPath(GUIDs[0]).Replace('/', System.IO.Path.DirectorySeparatorChar);
+                               AssetDatabase.GUIDToAssetPath(GUIDs[0]).Replace('/', System.IO.Path.DirectorySeparatorChar);
 
                     if (EditorUtility.DisplayDialog("VSCode Update", "A newer version of the VSCode plugin is available, would you like to update your version?", "Yes", "No"))
                     {
@@ -371,12 +371,14 @@ namespace dotBunny.Unity
             // I want that window, please and thank you
             System.Type T = System.Type.GetType("UnityEditor.PreferencesWindow,UnityEditor");
 
-            if ( EditorWindow.focusedWindow == null ) return;
-            
+            if (EditorWindow.focusedWindow == null)
+                return;
+
             // Only run this when the editor window is visible (cause its what screwed us up)
-            if (EditorWindow.focusedWindow.GetType() == T) {
+            if (EditorWindow.focusedWindow.GetType() == T)
+            {
                 var window = EditorWindow.GetWindow(T, true, "Unity Preferences");
-                
+
 
                 if (window == null)
                 {
@@ -388,8 +390,8 @@ namespace dotBunny.Unity
                 }
 
                 var invokerType = window.GetType();
-                var invokerMethod = invokerType.GetMethod("ReadPreferences", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var invokerMethod = invokerType.GetMethod("ReadPreferences",
+                                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
                 if (invokerMethod != null)
                 {
@@ -398,9 +400,9 @@ namespace dotBunny.Unity
                 else if (Debug)
                 {
                     UnityEngine.Debug.Log("[VSCode] No Reflection Method Found For Preferences");
-                }    
+                }
             }
-            
+
             //  // Get internal integration class
             //  System.Type iT = System.Type.GetType("UnityEditor.VisualStudioIntegration.UnityVSSupport,UnityEditor.VisualStudioIntegration");
             //  var iinvokerMethod = iT.GetMethod("ScriptEditorChanged", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
@@ -500,7 +502,7 @@ namespace dotBunny.Unity
             // Load Project
             CallVSCode("\"" + ProjectPath + "\" -r");
         }
-        
+
         [MenuItem("Assets/Open C# Project In Code", true, 1000)]
         static bool ValidateMenuOpenProject()
         {
@@ -551,7 +553,7 @@ namespace dotBunny.Unity
             {
                 UpdateUnityPreferences(Enabled);
 
-//UnityEditor.PreferencesWindow.Read
+                //UnityEditor.PreferencesWindow.Read
 
                 // TODO: Force Unity To Reload Preferences
                 // This seems to be a hick up / issue
@@ -588,15 +590,15 @@ namespace dotBunny.Unity
 
             GUILayout.Label(
                 new GUIContent(
-                string.Format("{0:0.00}", Version) + VersionCode,
-                "GitHub's Version @ " + string.Format("{0:0.00}", GitHubVersion)));
+                    string.Format("{0:0.00}", Version) + VersionCode,
+                    "GitHub's Version @ " + string.Format("{0:0.00}", GitHubVersion)));
 
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.EndVertical();
 
         }
-        
+
         /// <summary>
         /// Asset Open Callback (from Unity)
         /// </summary>
@@ -718,7 +720,7 @@ namespace dotBunny.Unity
                 content = Regex.Replace(content, "<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>", "<TargetFrameworkVersion>v2.0</TargetFrameworkVersion>");
             }
 
-            string targetPath = "<TargetPath>Temp\\bin\\Debug\\</TargetPath>"; //OutputPath
+            string targetPath = "";// "<TargetPath>Temp" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "Debug" + Path.DirectorySeparatorChar + "</TargetPath>"; //OutputPath
             string langVersion = "<LangVersion>default</LangVersion>";
 
 
@@ -818,7 +820,7 @@ namespace dotBunny.Unity
             if (enabled)
             {
 #if UNITY_EDITOR_OSX
-				var newPath = "/Applications/Visual Studio Code.app";
+                var newPath = "/Applications/Visual Studio Code.app";
 #elif UNITY_EDITOR_WIN
                 var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
 #else
@@ -840,7 +842,7 @@ namespace dotBunny.Unity
 
                 EditorPrefs.SetString("kScriptEditorArgs", "-r -g \"$(File):$(Line)\"");
                 EditorPrefs.SetString("kScriptEditorArgs" + newPath, "-r -g \"$(File):$(Line)\"");
-	
+
 
                 // MonoDevelop Solution
                 if (EditorPrefs.GetBool("kMonoDevelopSolutionProperties", false))
@@ -897,7 +899,7 @@ namespace dotBunny.Unity
                     EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", false);
                 }
             }
-            
+
             FixUnityPreferences();
         }
 

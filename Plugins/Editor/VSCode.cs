@@ -714,11 +714,14 @@ namespace dotBunny.Unity
             if (content.Length == 0)
                 return "";
 
+// Note: it causes OmniSharp faults on Windows, such as "not seeing UnityEngine.UI". 3.5 target works fine
+#if !UNITY_EDITOR_WIN
             // Make sure our reference framework is 2.0, still the base for Unity
             if (content.IndexOf("<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>") != -1)
             {
                 content = Regex.Replace(content, "<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>", "<TargetFrameworkVersion>v2.0</TargetFrameworkVersion>");
             }
+#endif
 
             string targetPath = "";// "<TargetPath>Temp" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "Debug" + Path.DirectorySeparatorChar + "</TargetPath>"; //OutputPath
             string langVersion = "<LangVersion>default</LangVersion>";

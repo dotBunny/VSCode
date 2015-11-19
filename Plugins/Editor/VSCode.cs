@@ -23,12 +23,12 @@ namespace dotBunny.Unity
     {
         /// <summary>
         /// Current Version Number
-        /// </summary
+        /// </summary>
         public const float Version = 2.2f;
 
         /// <summary>
         /// Current Version Code
-        /// </summary
+        /// </summary>
         public const string VersionCode = "-RELEASE";
 
         #region Properties

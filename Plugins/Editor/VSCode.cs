@@ -931,6 +931,7 @@ namespace dotBunny.Unity
                 "\t\t\"**/.git\":true,\n" +
                 "\t\t\"**/.gitignore\":true,\n" +
                 "\t\t\"**/.gitmodules\":true,\n" +
+                "\t\t\"**/.svn\":true,\n" +
 
 
                 // Project Files

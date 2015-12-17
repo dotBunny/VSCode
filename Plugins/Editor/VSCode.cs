@@ -930,6 +930,7 @@ namespace dotBunny.Unity
                 "\t\t\"**/.DS_Store\":true,\n" +
                 "\t\t\"**/.git\":true,\n" +
                 "\t\t\"**/.gitignore\":true,\n" +
+                "\t\t\"**/.gitattributes":true,\n" +
                 "\t\t\"**/.gitmodules\":true,\n" +
                 "\t\t\"**/.svn\":true,\n" +
 

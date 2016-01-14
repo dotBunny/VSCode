@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   2.4
+ *   2.41
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -25,7 +25,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Current Version Number
         /// </summary>
-        public const float Version = 2.4f;
+        public const float Version = 2.41f;
 
         /// <summary>
         /// Current Version Code
@@ -339,6 +339,14 @@ namespace dotBunny.Unity
             // Set the last update time
             LastUpdate = DateTime.Now;
 
+            // Fix for oddity in downlo
+            if ( fileContent.Substring(0, 2) != "/*" ) {
+                int startPosition = fileContent.IndexOf("/*", StringComparison.CurrentCultureIgnoreCase);
+                
+                // Jump over junk characters
+                fileContent = fileContent.Substring(startPosition);
+            }
+
             string[] fileExploded = fileContent.Split('\n');
             if (fileExploded.Length > 7)
             {
@@ -348,6 +356,7 @@ namespace dotBunny.Unity
                     GitHubVersion = github;
                 }
 
+
                 if (github > Version)
                 {
                     var GUIDs = AssetDatabase.FindAssets("t:Script VSCode");
@@ -356,6 +365,11 @@ namespace dotBunny.Unity
 
                     if (EditorUtility.DisplayDialog("VSCode Update", "A newer version of the VSCode plugin is available, would you like to update your version?", "Yes", "No"))
                     {
+                        // Always make sure the file is writable
+                        System.IO.FileInfo fileInfo = new System.IO.FileInfo(path);
+                        fileInfo.IsReadOnly = false;
+                        
+                        // Write update file
                         File.WriteAllText(path, fileContent);
                     }
                 }

@@ -19,6 +19,7 @@ namespace dotBunny.Unity
     using UnityEditor;
     using UnityEngine;
 
+    [InitializeOnLoad]
     public static class VSCode
     {
         /// <summary>
@@ -197,6 +198,7 @@ namespace dotBunny.Unity
             if (Enabled)
             {
                 UpdateUnityPreferences(true);
+                UpdateLaunchFile();
 
                 // Add Update Check
                 DateTime targetDate = LastUpdate.AddDays(UpdateTime);
@@ -205,9 +207,6 @@ namespace dotBunny.Unity
                     CheckForUpdate();
                 }
             }
-
-
-
 
             //System.AppDomain.CurrentDomain.DomainUnload += System_AppDomain_CurrentDomain_DomainUnload;
         }
@@ -241,7 +240,6 @@ namespace dotBunny.Unity
         /// </summary>
         public static void UpdateSolution()
         {
-
             // No need to process if we are not enabled
             if (!VSCode.Enabled)
             {
@@ -651,27 +649,9 @@ namespace dotBunny.Unity
         /// </summary>
         static void OnPlaymodeStateChanged()
         {
-            if (VSCode.Enabled && VSCode.WriteLaunchFile && UnityEngine.Application.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode)
+            if (UnityEngine.Application.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode)
             {
-                int port = GetDebugPort();
-                if (port > -1)
-                {
-                    if (!Directory.Exists(VSCode.SettingsFolder))
-                        System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);
-                    UpdateLaunchFile(port);
-
-                    if (VSCode.Debug)
-                    {
-                        UnityEngine.Debug.Log("[VSCode] Debug Port Found (" + port + ")");
-                    }
-                }
-                else
-                {
-                    if (VSCode.Debug)
-                    {
-                        UnityEngine.Debug.LogWarning("[VSCode] Unable to determine debug port.");
-                    }
-                }
+                UpdateLaunchFile();
             }
         }
 
@@ -684,7 +664,6 @@ namespace dotBunny.Unity
             EditorApplication.playmodeStateChanged -= OnPlaymodeStateChanged;
             EditorApplication.playmodeStateChanged += OnPlaymodeStateChanged;
         }
-
 
         /// <summary>
         /// Remove extra/erroneous lines from a file.
@@ -810,11 +789,33 @@ namespace dotBunny.Unity
         /// <summary>
         /// Update Visual Studio Code Launch file
         /// </summary>
-        static void UpdateLaunchFile(int port)
+        static void UpdateLaunchFile()
         {
-            // Write out proper formatted JSON (hence no more SimpleJSON here)
-            string fileContent = "{\n\t\"version\":\"0.2.0\",\n\t\"configurations\":[ \n\t\t{\n\t\t\t\"name\":\"Unity\",\n\t\t\t\"type\":\"mono\",\n\t\t\t\"request\":\"attach\",\n\t\t\t\"address\":\"localhost\",\n\t\t\t\"port\":" + port + "\n\t\t}\n\t]\n}";
-            File.WriteAllText(VSCode.LaunchPath, fileContent);
+            if (VSCode.Enabled && VSCode.WriteLaunchFile)
+            {
+                int port = GetDebugPort();
+                if (port > -1)
+                {
+                    if (!Directory.Exists(VSCode.SettingsFolder))
+                        System.IO.Directory.CreateDirectory(VSCode.SettingsFolder);
+
+                    // Write out proper formatted JSON (hence no more SimpleJSON here)
+                    string fileContent = "{\n\t\"version\":\"0.2.0\",\n\t\"configurations\":[ \n\t\t{\n\t\t\t\"name\":\"Unity\",\n\t\t\t\"type\":\"mono\",\n\t\t\t\"request\":\"attach\",\n\t\t\t\"address\":\"localhost\",\n\t\t\t\"port\":" + port + "\n\t\t}\n\t]\n}";
+                    File.WriteAllText(VSCode.LaunchPath, fileContent);
+
+                    if (VSCode.Debug)
+                    {
+                        UnityEngine.Debug.Log("[VSCode] Debug Port Found (" + port + ")");
+                    }
+                }
+                else
+                {
+                    if (VSCode.Debug)
+                    {
+                        UnityEngine.Debug.LogWarning("[VSCode] Unable to determine debug port.");
+                    }
+                }
+            }
         }
 
         /// <summary>

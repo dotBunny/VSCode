@@ -2,8 +2,8 @@
 > Seamless Visual Studio Code Integration in Unity - As seen in the [Visual Studio Code documentation!](https://code.visualstudio.com/Docs/runtimes/unity)
 
 ### Requirements
-##### Unity 4.6+
-I am not sure exactly where in the 4.x cycle some of the features I'm using were introduced, but I'm guessing its around the 4.6+ mark.
+##### Unity 4.5+
+I am not sure exactly where in the 4.x cycle some of the features I'm using were introduced, but I'm guessing its around the 4.5+ mark. I've checked with the latest 4.5.0f6 release.
 
 #####Visual Studio Code 0.10.1+
 Get the [latest version](https://code.visualstudio.com), or have a look at the past releases of the VSCode [plugin](https://github.com/dotBunny/VSCode/releases/tag/1.6.5) for support for your version.
@@ -23,7 +23,7 @@ Once the VSCode file is in place, simply navigate your way to the `Unity Prefere
 
 That's it! Your ready to go!
 
-OK, so maybe some people need a little video explaining some of the finer details of how to use the plugin. So I shot a [quick video](https://vimeo.com/dotbunny/vscode) that highlights the ups and the downs (like Unity hanging after debugging sometimes) for people to watch. Please note this video is from a previous version of the plugin where things are in the menu, this has changed.
+OK, so maybe some people need a little video explaining some of the finer details of how to use the plugin. So I shot a [quick video](https://vimeo.com/dotbunny/vscode) that highlights the ups and the downs (like Unity hanging after debugging sometimes) for people to watch. Please note this video is from a previous version of the plugin where things are in the menu, this has changed since then.
 
 ### Platform Support
 I use the plugin every day on a Mac (so it's battle tested there), and occasionally test it on a Windows VM. As for the recently announced Linux support, it should work just like the Mac version. I'll get around to installing the Linux editor sometime in the near future.

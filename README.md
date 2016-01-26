@@ -2,8 +2,8 @@
 > Seamless Visual Studio Code Integration in Unity - As seen in the [Visual Studio Code documentation!](https://code.visualstudio.com/Docs/runtimes/unity)
 
 ### Requirements
-##### Unity 4.5+
-I am not sure exactly where in the 4.x cycle some of the features I'm using were introduced, but I'm guessing its around the 4.5+ mark. I've checked with the latest 4.5.0f6 release.
+##### Unity > 4.5 && Unity < 5.5
+I am not sure exactly where in the 4.x cycle some of the features I'm using were introduced, but I'm guessing its around the 4.5+ mark. I've checked with the latest 4.5.0f6 release. Unity has also committed to having full support for Code when Unity 5.5 drops. So at that point all bets are off for the usefulness of this plugin. Like our MonoDevelop.Unity plugin of past, Unity catches up eventually.
 
 #####Visual Studio Code 0.10.1+
 Get the [latest version](https://code.visualstudio.com), or have a look at the past releases of the VSCode [plugin](https://github.com/dotBunny/VSCode/releases/tag/1.6.5) for support for your version.

@@ -35,7 +35,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Download URL for Unity Debbuger
         /// </summary>
-        public const string UnityDebuggerURL = "https://unity.gallery.vsassets.io/_apis/public/gallery/publisher/Unity/extension/unity-debug/1.0.1/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage";
+        public const string UnityDebuggerURL = "https://raw.githubusercontent.com/dotBunny/VSCode-Test/master/Downloads/unity-debug-101.vsix";
 
         #region Properties
 

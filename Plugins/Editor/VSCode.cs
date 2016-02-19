@@ -253,7 +253,7 @@ namespace dotBunny.Unity
                 
                 // Add Update Check
                 DateTime targetDate = LastUpdate.AddDays(UpdateTime);
-                if (DateTime.Now >= targetDate)
+                if (DateTime.Now >= targetDate && AutomaticUpdates)
                 {
                     CheckForUpdate();
                 }

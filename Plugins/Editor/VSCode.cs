@@ -345,7 +345,7 @@ namespace dotBunny.Unity
             proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
             proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
-            proc.StartInfo.FileName = "code";
+            proc.StartInfo.FileName = "code.cmd";
             proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #else
@@ -357,7 +357,13 @@ namespace dotBunny.Unity
             proc.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             proc.StartInfo.CreateNoWindow = true;
             proc.StartInfo.RedirectStandardOutput = true;
-            proc.Start();
+            try {
+                proc.Start();
+            } catch (System.ComponentModel.Win32Exception e){
+                UnityEngine.Debug.LogException(e);
+                UnityEngine.Debug.LogError("NativeErrorCode: " + e.NativeErrorCode.ToString() +
+                    " see https://msdn.microsoft.com/en-us/library/windows/desktop/ms681381%28v=vs.85%29.aspx for error code reference");
+            }
         }
 
         /// <summary>

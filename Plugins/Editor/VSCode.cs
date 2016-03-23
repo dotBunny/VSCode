@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   2.45
+ *   2.47
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -15,7 +15,7 @@ namespace dotBunny.Unity
 {
     using System;
     using System.IO;
-    using System.Text.RegularExpressions;
+    using System.Text.RegularExpressions;  
     using UnityEditor;
     using UnityEngine;
 
@@ -25,7 +25,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Current Version Number
         /// </summary>
-        public const float Version = 2.45f;
+        public const float Version = 2.47f;
 
         /// <summary>
         /// Current Version Code
@@ -39,6 +39,28 @@ namespace dotBunny.Unity
 
         #region Properties
 
+        /// <summary>
+        /// Path to VSCode executable
+        public static string CodePath
+        {
+            get
+            {
+
+#if UNITY_EDITOR_OSX
+                var newPath = "/Applications/Visual Studio Code.app";
+#elif UNITY_EDITOR_WIN
+                var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
+#else
+                var newPath = "/usr/local/bin/code";
+#endif                
+                return EditorPrefs.GetString("VSCode_CodePath", newPath);
+            }
+            set 
+            {
+                EditorPrefs.GetString("VSCode_CodePath", value);
+            }
+        }
+        
         /// <summary>
         /// Should debug information be displayed in the Unity terminal?
         /// </summary>
@@ -345,12 +367,12 @@ namespace dotBunny.Unity
             proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
             proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
-            proc.StartInfo.FileName = "code";
+            proc.StartInfo.FileName = CodePath;
             proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #else
             //TODO: Allow for manual path to code?
-            proc.StartInfo.FileName = "code";
+            proc.StartInfo.FileName = CodePath;
             proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #endif
@@ -671,8 +693,12 @@ namespace dotBunny.Unity
             EditorGUILayout.HelpBox("Support development of this plugin, follow @reapazor and @dotbunny on Twitter.", MessageType.Info);
 
             EditorGUI.BeginChangeCheck();
-
+            
             Enabled = EditorGUILayout.Toggle(new GUIContent("Enable Integration", "Should the integration work its magic for you?"), Enabled);
+            
+            CodePath = EditorGUILayout.DelayedTextField(new GUIContent("VS Code Path", "Full pah to the Micosoft Visual Studio code executable."), CodePath);
+            
+            
             UseUnityDebugger = EditorGUILayout.Toggle(new GUIContent("Use Unity Debugger", "Should the integration integrate with Unity's VSCode Extension (must be installed)."), UseUnityDebugger);
 
             EditorGUILayout.Space();
@@ -726,8 +752,6 @@ namespace dotBunny.Unity
                 return;
             }
             EditorGUILayout.Space();
-            EditorGUILayout.Space();
-
 
             if (UseUnityDebugger)
             {
@@ -993,20 +1017,12 @@ namespace dotBunny.Unity
         {
             if (enabled)
             {
-#if UNITY_EDITOR_OSX
-                var newPath = "/Applications/Visual Studio Code.app";
-#elif UNITY_EDITOR_WIN
-                var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
-#else
-                var newPath = "/usr/local/bin/code";
-#endif
-
                 // App
-                if (EditorPrefs.GetString("kScriptsDefaultApp") != newPath)
+                if (EditorPrefs.GetString("kScriptsDefaultApp") != CodePath)
                 {
                     EditorPrefs.SetString("VSCode_PreviousApp", EditorPrefs.GetString("kScriptsDefaultApp"));
                 }
-                EditorPrefs.SetString("kScriptsDefaultApp", newPath);
+                EditorPrefs.SetString("kScriptsDefaultApp", CodePath);
 
                 // Arguments
                 if (EditorPrefs.GetString("kScriptEditorArgs") != "-r -g \"$(File):$(Line)\"")
@@ -1015,7 +1031,7 @@ namespace dotBunny.Unity
                 }
 
                 EditorPrefs.SetString("kScriptEditorArgs", "-r -g \"$(File):$(Line)\"");
-                EditorPrefs.SetString("kScriptEditorArgs" + newPath, "-r -g \"$(File):$(Line)\"");
+                EditorPrefs.SetString("kScriptEditorArgs" + CodePath, "-r -g \"$(File):$(Line)\"");
 
 
                 // MonoDevelop Solution

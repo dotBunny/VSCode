@@ -57,7 +57,7 @@ namespace dotBunny.Unity
             }
             set 
             {
-                EditorPrefs.GetString("VSCode_CodePath", value);
+                EditorPrefs.SetString("VSCode_CodePath", value);
             }
         }
         

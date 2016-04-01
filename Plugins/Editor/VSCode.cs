@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   2.47
+ *   2.48
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -25,7 +25,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Current Version Number
         /// </summary>
-        public const float Version = 2.47f;
+        public const float Version = 2.48f;
 
         /// <summary>
         /// Current Version Code
@@ -696,8 +696,11 @@ namespace dotBunny.Unity
             
             Enabled = EditorGUILayout.Toggle(new GUIContent("Enable Integration", "Should the integration work its magic for you?"), Enabled);
             
-            CodePath = EditorGUILayout.DelayedTextField(new GUIContent("VS Code Path", "Full pah to the Micosoft Visual Studio code executable."), CodePath);
-            
+#if !UNITY_4_0 && !UNITY_4_1 && !UNITY_4_2 && !UNITY_4_3 && !UNITY_4_5 && !UNITY_4_6 && !UNITY_4_7
+            CodePath = EditorGUILayout.DelayedTextField(new GUIContent("VS Code Path", "Full path to the Micosoft Visual Studio code executable."), CodePath);
+#else
+            CodePath = EditorGUILayout.TextField(new GUIContent("VS Code Path", "Full path to the Micosoft Visual Studio code executable."), CodePath);
+#endif
             
             UseUnityDebugger = EditorGUILayout.Toggle(new GUIContent("Use Unity Debugger", "Should the integration integrate with Unity's VSCode Extension (must be installed)."), UseUnityDebugger);
 

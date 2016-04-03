@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   2.48
+ *   2.5
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -25,7 +25,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Current Version Number
         /// </summary>
-        public const float Version = 2.48f;
+        public const float Version = 2.5f;
 
         /// <summary>
         /// Current Version Code
@@ -1051,12 +1051,12 @@ namespace dotBunny.Unity
                 }
                 EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", false);
 
-                // Attach to Editor
                 if (!EditorPrefs.GetBool("AllowAttachedDebuggingOfEditor", false))
                 {
                     EditorPrefs.SetBool("VSCode_PreviousAttach", false);
                 }
                 EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", true);
+                
             }
             else
             {
@@ -1085,12 +1085,10 @@ namespace dotBunny.Unity
                     EditorPrefs.SetBool("kExternalEditorSupportsUnityProj", true);
                 }
 
-
-                // Restore previous attach
-                if (!EditorPrefs.GetBool("VSCode_PreviousAttach", true))
-                {
-                    EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", false);
-                }
+                // Always leave editor attaching on, I know, it solves the problem of needing to restart for this
+                // to actually work
+                EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", true);
+                
             }
 
             FixUnityPreferences();

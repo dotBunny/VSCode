@@ -814,7 +814,8 @@ namespace dotBunny.Unity
             // determine asset that has been double clicked in the project view
             UnityEngine.Object selected = EditorUtility.InstanceIDToObject(instanceID);
 
-            if (selected.GetType().ToString() == "UnityEditor.MonoScript")
+            if (selected.GetType().ToString() == "UnityEditor.MonoScript" ||
+                selected.GetType().ToString() == "UnityEngine.Shader")
             {
                 string completeFilepath = appPath + Path.DirectorySeparatorChar + AssetDatabase.GetAssetPath(selected);
 

@@ -49,7 +49,7 @@ namespace dotBunny.Unity
 #if UNITY_EDITOR_OSX
                 var newPath = "/Applications/Visual Studio Code.app";
 #elif UNITY_EDITOR_WIN
-                var newPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
+                var newPath = ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
 #else
                 var newPath = "/usr/local/bin/code";
 #endif                
@@ -60,6 +60,18 @@ namespace dotBunny.Unity
                 EditorPrefs.SetString("VSCode_CodePath", value);
             }
         }
+        
+        static string ProgramFilesx86()
+		{
+			if( 8 == IntPtr.Size 
+				|| (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("PROCESSOR_ARCHITEW6432"))))
+			{
+				return Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+			}
+
+			return Environment.GetEnvironmentVariable("ProgramFiles");
+		}
+		
         
         /// <summary>
         /// Should debug information be displayed in the Unity terminal?

@@ -51,7 +51,7 @@ namespace dotBunny.Unity
 #elif UNITY_EDITOR_WIN
                 var newPath = ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd";
 #else
-                var newPath = "/usr/local/bin/code";
+                var newPath = "/usr/bin/code";
 #endif                
                 return EditorPrefs.GetString("VSCode_CodePath", newPath);
             }
@@ -367,25 +367,51 @@ namespace dotBunny.Unity
 
         #region Private Members
 
+		/// <summary>
+		/// Parse given folders as parameters and check for spaces
+		/// </summary>
+		static string EscapePathSpaces(string args)
+		{
+			string newargs = "";
+			//Check for arguments that start with a quote and check for spaces inside it
+			for (int i = 0; i < args.Length; i++) {
+				//Check each character in the string. If the character next to it isn't a
+				//argument character (- or --) or a quote ("), escape it with "\ "
+				string current = args.Substring(i, 1); //get current character as string
+				string next = (i < args.Length - 1 ? args.Substring (i + 1, 1) : ""); //get the next character
+				bool isSpace = (current == " ");
+				bool nextIsArgChar = (next == "-");
+				bool nextIsQuoteChar = (next == "\"");
+				if (!isSpace) {
+					newargs += current;
+				} else {
+					newargs += (nextIsArgChar || nextIsQuoteChar ? current : @"\ ");
+				}
+			}
+			return newargs;
+		}
+
         /// <summary>
-        /// Call VSCode with arguements
+        /// Call VSCode with arguments
         /// </summary>
         static void CallVSCode(string args)
         {
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
 
+			//Escaping spaces in the name isn't needed in a Windows environment
+			//So for OS X and Linux/Unix, call EscapePathScapes(args) instead of args
 #if UNITY_EDITOR_OSX
             proc.StartInfo.FileName = "open";
-            proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
+			proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + EscapePathSpaces(args);
             proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
             proc.StartInfo.FileName = CodePath;
-            proc.StartInfo.Arguments = args;
+			proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #else
             //TODO: Allow for manual path to code?
             proc.StartInfo.FileName = CodePath;
-            proc.StartInfo.Arguments = args;
+			proc.StartInfo.Arguments = EscapePathSpaces(args);
             proc.StartInfo.UseShellExecute = false;
 #endif
             proc.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;

@@ -50,7 +50,7 @@ namespace dotBunny.Unity
 		{
 			//Value not set, set to "" or current path is invalid, try to autodetect it
 			//If autodetect fails, a error will be printed and the default value set
-			EditorPrefs.SetString("VSCode_CodePath", autodetectCodePath);
+			EditorPrefs.SetString("VSCode_CodePath", autodetectCodePath());
 			//If its not installed or the install folder isn't a "normal" one,
 			//autodetectCodePath will print a error message to the Unity Console
 		}

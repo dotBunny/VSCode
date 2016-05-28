@@ -391,20 +391,19 @@ namespace dotBunny.Unity
         	static string autodetectCodePath() 
         	{
         	// FIXME: Need to query possible paths to the installation of VSCode on other OS X
+        	string[] possiblePaths =
         	#if UNITY_EDITOR_OSX
-        		string possiblePaths = 
         		{
         			"/Applications/Visual Studio Code.app"
         		}
         	#elif UNITY_EDITOR_WIN
         	// FIXME: Add additional paths which VSCode can be installed on Windows
-        		string possiblePaths = 
         		{
         			ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code"
         			+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd"
         		};
         	#else
-        		string[] possiblePaths = {
+        		{
         			"/usr/bin/code",
         			"/bin/code",
         			"/usr/local/bin/code"

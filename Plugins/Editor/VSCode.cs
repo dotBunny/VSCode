@@ -379,9 +379,9 @@ namespace dotBunny.Unity
         	
         	/// <summary>
         	/// Print a error message to the Unity Console about not finding the code executable
-        	static void PrintNotFound()
+        	static void PrintNotFound(string path)
         	{
-        		UnityEngine.Debug.LogError("Code executable in '" + CodePath + "' not found. Check" +
+        		UnityEngine.Debug.LogError("Code executable in '" + path + "' not found. Check" +
         		"Visual Studio Code installation and insert the correct path in the Properties menu");
         	}
         
@@ -395,7 +395,7 @@ namespace dotBunny.Unity
         	#if UNITY_EDITOR_OSX
         		{
         			"/Applications/Visual Studio Code.app"
-        		}
+        		};
         	#elif UNITY_EDITOR_WIN
         	// FIXME: Add additional paths which VSCode can be installed on Windows
         		{
@@ -416,7 +416,7 @@ namespace dotBunny.Unity
         				return possiblePaths[i];
         			}
         		}
-        		PrintNotFound();
+        		PrintNotFound(possiblePaths[0]);
         		return possiblePaths[0]; //returns the default one, printing a warning message 'executable not found'
         	}
 
@@ -452,7 +452,7 @@ namespace dotBunny.Unity
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
             if(!VSCodeExists(CodePath))
             {
-            	PrintNotFound();
+            	PrintNotFound(CodePath);
             	return; //Executable not found. Stop execution
             }
 

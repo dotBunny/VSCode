@@ -373,8 +373,12 @@ namespace dotBunny.Unity
         	/// </summary>
         	static bool VSCodeExists(string curPath)
         	{
-        		System.IO.FileInfo code = new System.IO.FileInfo(curPath);
+                #if UNITY_EDITOR_OSX
+                return System.IO.Directory.Exists(curPath);
+                #else
+                System.IO.FileInfo code = new System.IO.FileInfo(curPath);
         		return code.Exists;
+                #endif
         	}
         	
         	/// <summary>

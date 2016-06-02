@@ -385,7 +385,7 @@ namespace dotBunny.Unity
         	/// Print a error message to the Unity Console about not finding the code executable
         	static void PrintNotFound(string path)
         	{
-        		UnityEngine.Debug.LogError("Code executable in '" + path + "' not found. Check" +
+        		UnityEngine.Debug.LogError("[VSCode] Code executable in '" + path + "' not found. Check" +
         		"Visual Studio Code installation and insert the correct path in the Properties menu");
         	}
         
@@ -468,7 +468,7 @@ namespace dotBunny.Unity
             proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
             proc.StartInfo.FileName = CodePath;
-	    proc.StartInfo.Arguments = EscapePathSpaces(args);
+	    proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #else
             proc.StartInfo.FileName = CodePath;

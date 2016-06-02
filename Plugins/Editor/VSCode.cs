@@ -373,15 +373,19 @@ namespace dotBunny.Unity
         	/// </summary>
         	static bool VSCodeExists(string curPath)
         	{
-        		System.IO.FileInfo code = new System.IO.FileInfo(curPath);
+                #if UNITY_EDITOR_OSX
+                return System.IO.Directory.Exists(curPath);
+                #else
+                System.IO.FileInfo code = new System.IO.FileInfo(curPath);
         		return code.Exists;
+                #endif
         	}
         	
         	/// <summary>
         	/// Print a error message to the Unity Console about not finding the code executable
-        	static void PrintNotFound()
+        	static void PrintNotFound(string path)
         	{
-        		UnityEngine.Debug.LogError("Code executable in '" + CodePath + "' not found. Check" +
+        		UnityEngine.Debug.LogError("Code executable in '" + path + "' not found. Check" +
         		"Visual Studio Code installation and insert the correct path in the Properties menu");
         	}
         
@@ -391,20 +395,19 @@ namespace dotBunny.Unity
         	static string autodetectCodePath() 
         	{
         	// FIXME: Need to query possible paths to the installation of VSCode on other OS X
+        	string[] possiblePaths =
         	#if UNITY_EDITOR_OSX
-        		string possiblePaths = 
         		{
         			"/Applications/Visual Studio Code.app"
-        		}
+        		};
         	#elif UNITY_EDITOR_WIN
         	// FIXME: Add additional paths which VSCode can be installed on Windows
-        		string possiblePaths = 
         		{
         			ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code"
         			+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd"
         		};
         	#else
-        		string[] possiblePaths = {
+        		{
         			"/usr/bin/code",
         			"/bin/code",
         			"/usr/local/bin/code"
@@ -417,7 +420,7 @@ namespace dotBunny.Unity
         				return possiblePaths[i];
         			}
         		}
-        		PrintNotFound();
+        		PrintNotFound(possiblePaths[0]);
         		return possiblePaths[0]; //returns the default one, printing a warning message 'executable not found'
         	}
 
@@ -453,7 +456,7 @@ namespace dotBunny.Unity
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
             if(!VSCodeExists(CodePath))
             {
-            	PrintNotFound();
+            	PrintNotFound(CodePath);
             	return; //Executable not found. Stop execution
             }
 

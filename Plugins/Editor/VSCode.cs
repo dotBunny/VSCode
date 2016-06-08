@@ -385,7 +385,7 @@ namespace dotBunny.Unity
         	/// Print a error message to the Unity Console about not finding the code executable
         	static void PrintNotFound(string path)
         	{
-        		UnityEngine.Debug.LogError("Code executable in '" + path + "' not found. Check" +
+        		UnityEngine.Debug.LogError("[VSCode] Code executable in '" + path + "' not found. Check" +
         		"Visual Studio Code installation and insert the correct path in the Properties menu");
         	}
         
@@ -394,17 +394,17 @@ namespace dotBunny.Unity
         	/// </summary>
         	static string autodetectCodePath() 
         	{
-        	// FIXME: Need to query possible paths to the installation of VSCode on other OS X
         	string[] possiblePaths =
         	#if UNITY_EDITOR_OSX
         		{
         			"/Applications/Visual Studio Code.app"
         		};
         	#elif UNITY_EDITOR_WIN
-        	// FIXME: Add additional paths which VSCode can be installed on Windows
         		{
         			ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code"
-        			+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd"
+        			+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd",
+        			ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code Insiders"
+        			+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code-insiders.cmd"
         		};
         	#else
         		{
@@ -460,15 +460,15 @@ namespace dotBunny.Unity
             	return; //Executable not found. Stop execution
             }
 
-			//Escaping spaces in the name isn't needed in a Windows environment
-			//So for OS X and Linux/Unix, call EscapePathScapes(args) instead of args
+	//Escaping spaces in the name isn't needed in a Windows environment
+	//So for OS X and Linux/Unix, call EscapePathScapes(args) instead of args
 #if UNITY_EDITOR_OSX
             proc.StartInfo.FileName = "open";
 	    proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + EscapePathSpaces(args);
             proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
             proc.StartInfo.FileName = CodePath;
-	    proc.StartInfo.Arguments = EscapePathSpaces(args);
+	    proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #else
             proc.StartInfo.FileName = CodePath;

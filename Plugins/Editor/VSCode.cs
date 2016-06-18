@@ -464,7 +464,7 @@ namespace dotBunny.Unity
 	//So for OS X and Linux/Unix, call EscapePathScapes(args) instead of args
 #if UNITY_EDITOR_OSX
             proc.StartInfo.FileName = "open";
-	    proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + EscapePathSpaces(args);
+	    proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
             proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
             proc.StartInfo.FileName = CodePath;

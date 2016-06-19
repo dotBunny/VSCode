@@ -22,6 +22,7 @@ namespace dotBunny.Unity
     [InitializeOnLoad]
     public static class VSCode
     {
+
         /// <summary>
         /// Current Version Number
         /// </summary>
@@ -45,15 +46,15 @@ namespace dotBunny.Unity
         {
             get
             {
-		string current = EditorPrefs.GetString("VSCode_CodePath", "");
-		if(current == "" || !VSCodeExists(current))
-		{
-			//Value not set, set to "" or current path is invalid, try to autodetect it
-			//If autodetect fails, a error will be printed and the default value set
-			EditorPrefs.SetString("VSCode_CodePath", autodetectCodePath());
-			//If its not installed or the install folder isn't a "normal" one,
-			//autodetectCodePath will print a error message to the Unity Console
-		}
+		        string current = EditorPrefs.GetString("VSCode_CodePath", "");
+                if(current == "" || !VSCodeExists(current))
+                {
+                    //Value not set, set to "" or current path is invalid, try to autodetect it
+                    //If autodetect fails, a error will be printed and the default value set
+                    EditorPrefs.SetString("VSCode_CodePath", AutodetectCodePath());
+                    //If its not installed or the install folder isn't a "normal" one,
+                    //AutodetectCodePath will print a error message to the Unity Console
+                }
                 return EditorPrefs.GetString("VSCode_CodePath", current);
             }
             set 
@@ -383,6 +384,7 @@ namespace dotBunny.Unity
         	
         	/// <summary>
         	/// Print a error message to the Unity Console about not finding the code executable
+            /// </summary>
         	static void PrintNotFound(string path)
         	{
         		UnityEngine.Debug.LogError("[VSCode] Code executable in '" + path + "' not found. Check" +
@@ -392,7 +394,7 @@ namespace dotBunny.Unity
         	/// <summary>
         	/// Try to find automatically the installation of VSCode
         	/// </summary>
-        	static string autodetectCodePath() 
+        	static string AutodetectCodePath() 
         	{
         	string[] possiblePaths =
         	#if UNITY_EDITOR_OSX
@@ -424,30 +426,6 @@ namespace dotBunny.Unity
         		return possiblePaths[0]; //returns the default one, printing a warning message 'executable not found'
         	}
 
-		/// <summary>
-		/// Parse given folders as parameters and check for spaces
-		/// </summary>
-		static string EscapePathSpaces(string args)
-		{
-			string newargs = "";
-			//Check for arguments that start with a quote and check for spaces inside it
-			for (int i = 0; i < args.Length; i++) {
-				//Check each character in the string. If the character next to it isn't a
-				//argument character (- or --) or a quote ("), escape it with "\ "
-				string current = args.Substring(i, 1); //get current character as string
-				string next = (i < args.Length - 1 ? args.Substring (i + 1, 1) : ""); //get the next character
-				bool isSpace = (current == " ");
-				bool nextIsArgChar = (next == "-");
-				bool nextIsQuoteChar = (next == "\"");
-				if (!isSpace) {
-					newargs += current;
-				} else {
-					newargs += (nextIsArgChar || nextIsQuoteChar ? current : @"\ ");
-				}
-			}
-			return newargs;
-		}
-
         /// <summary>
         /// Call VSCode with arguments
         /// </summary>
@@ -464,15 +442,15 @@ namespace dotBunny.Unity
 	//So for OS X and Linux/Unix, call EscapePathScapes(args) instead of args
 #if UNITY_EDITOR_OSX
             proc.StartInfo.FileName = "open";
-	    proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
+	        proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
             proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
             proc.StartInfo.FileName = CodePath;
-	    proc.StartInfo.Arguments = args;
+	        proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #else
             proc.StartInfo.FileName = CodePath;
-	    proc.StartInfo.Arguments = EscapePathSpaces(args);
+	        proc.StartInfo.Arguments = args;
             proc.StartInfo.UseShellExecute = false;
 #endif
             proc.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;

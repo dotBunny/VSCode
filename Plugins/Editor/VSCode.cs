@@ -397,11 +397,12 @@ namespace dotBunny.Unity
         	static string AutodetectCodePath() 
         	{
         	string[] possiblePaths =
-        	#if UNITY_EDITOR_OSX
-        		{
-        			"/Applications/Visual Studio Code.app"
-        		};
-        	#elif UNITY_EDITOR_WIN
+#if UNITY_EDITOR_OSX
+                {
+                    "/Applications/Visual Studio Code.app",
+                    "/Applications/Visual Studio Code - Insiders.app"
+                };
+#elif UNITY_EDITOR_WIN
         		{
         			ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code"
         			+ Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd",
@@ -442,7 +443,7 @@ namespace dotBunny.Unity
 	//So for OS X and Linux/Unix, call EscapePathScapes(args) instead of args
 #if UNITY_EDITOR_OSX
             proc.StartInfo.FileName = "open";
-	        proc.StartInfo.Arguments = " -n -b \"com.microsoft.VSCode\" --args " + args;
+            proc.StartInfo.Arguments = " -n -a \"" + CodePath + "\" --args " + args;
             proc.StartInfo.UseShellExecute = false;
 #elif UNITY_EDITOR_WIN
             proc.StartInfo.FileName = CodePath;

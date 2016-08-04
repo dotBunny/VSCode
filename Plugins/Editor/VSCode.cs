@@ -4,13 +4,11 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   2.6
+ *   2.7
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
  */
-// REQUIRES: VSCode 0.8.0 - Settings directory moved to .vscode
-// TODO: Currently VSCode will not debug mono on Windows -- need a solution.
 namespace dotBunny.Unity
 {
     using System;
@@ -62,6 +60,10 @@ namespace dotBunny.Unity
             }
         }
         
+        /// <summary>
+        /// Get Program Files Path
+        /// </summary>
+        /// <returns>The platforms "Program Files" path.</returns>
         static string ProgramFilesx86()
 		{
 			if( 8 == IntPtr.Size 

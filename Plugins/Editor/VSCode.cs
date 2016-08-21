@@ -726,7 +726,7 @@ namespace dotBunny.Unity
             SyncSolution();
 
             // Load Project
-            CallVSCode("\"" + ProjectPath + "\" -r");
+            CallVSCode("\"" + ProjectPath + "\"");
         }
 
         /// <summary>

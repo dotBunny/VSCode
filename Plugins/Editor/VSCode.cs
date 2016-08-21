@@ -782,7 +782,9 @@ namespace dotBunny.Unity
             }
             EditorGUILayout.BeginVertical();
 
-            EditorGUILayout.HelpBox("Support development of this plugin, follow @reapazor and @dotbunny on Twitter.", MessageType.Info);
+            var developmentInfo = "Support development of this plugin, follow @reapazor and @dotbunny on Twitter.";
+            var versionInfo = string.Format("{0:0.00}", Version) + VersionCode + ", GitHub version @ " + string.Format("{0:0.00}", GitHubVersion);
+            EditorGUILayout.HelpBox(developmentInfo + " --- [ " + versionInfo + " ]", MessageType.None);
 
             EditorGUI.BeginChangeCheck();
             
@@ -873,17 +875,6 @@ namespace dotBunny.Unity
                 }
             }
 
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-
-            GUILayout.Label(
-                new GUIContent(
-                    string.Format("{0:0.00}", Version) + VersionCode,
-                    "GitHub's Version @ " + string.Format("{0:0.00}", GitHubVersion)));
-
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.EndVertical();
         }
 
         /// <summary>

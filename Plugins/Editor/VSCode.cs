@@ -136,6 +136,21 @@ namespace dotBunny.Unity
                 }
             }
         }
+        
+        /// <summary>
+        /// When opening a project in Unity, should it automatically open in VS Code.
+        /// </summary>
+        public static bool AutoOpenEnabled
+        {
+            get
+            {
+                return EditorPrefs.GetBool("VSCode_AutoOpenEnabled", false);
+            }
+            set
+            {
+                EditorPrefs.SetBool("VSCode_AutoOpenEnabled", value);
+            }
+        }
 
         /// <summary>
         /// Should the launch.json file be written?
@@ -294,6 +309,13 @@ namespace dotBunny.Unity
                 {
                     CheckForUpdate();
                 }
+
+                // Open VS Code automatically when project is loaded
+                if (AutoOpenEnabled)
+                {
+                    VSCode.MenuOpenProject();
+                }
+                
             }
             
             // Event for when script is reloaded 
@@ -788,6 +810,8 @@ namespace dotBunny.Unity
             Enabled = EditorGUILayout.Toggle(new GUIContent("Enable Integration", "Should the integration work its magic for you?"), Enabled);
 
             UseUnityDebugger = EditorGUILayout.Toggle(new GUIContent("Use Unity Debugger", "Should the integration integrate with Unity's VSCode Extension (must be installed)."), UseUnityDebugger);
+
+            AutoOpenEnabled = EditorGUILayout.Toggle(new GUIContent("Enable Auto Launch", "When opening a project in Unity, should it automatically open in VS Code?"), AutoOpenEnabled);
 
             EditorGUILayout.Space();
             RevertExternalScriptEditorOnExit = EditorGUILayout.Toggle(new GUIContent("Revert Script Editor On Unload", "Should the external script editor setting be reverted to its previous setting on project unload? This is useful if you do not use Code with all your projects."),RevertExternalScriptEditorOnExit);

@@ -570,10 +570,6 @@ namespace dotBunny.Unity
             }
         }
 
-        static void Update() {
-
-        }
-
         /// <summary>
         /// Clear out any existing project files and lingering stuff that might cause problems
         /// </summary>

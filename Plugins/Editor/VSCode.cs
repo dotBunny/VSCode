@@ -313,7 +313,7 @@ namespace dotBunny.Unity
                 // Open VS Code automatically when project is loaded
                 if (AutoOpenEnabled)
                 {
-                    VSCode.MenuOpenProject();
+                    CheckForAutoOpen();
                 }
                 
             }
@@ -545,6 +545,33 @@ namespace dotBunny.Unity
 
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks whether it should auto-open VSCode 
+        /// </summary>
+        /// <remarks>
+        /// VSCode() gets called on Launch and Run, through IntializeOnLoad
+        /// https://docs.unity3d.com/ScriptReference/InitializeOnLoadAttribute.html
+        /// To make sure it only opens VSCode when Unity (re)launches (i.e. opens a project),
+        /// we compare the launch time, which we calculate using EditorApplication.timeSinceStartup.  
+        /// </remarks>
+        static void CheckForAutoOpen()
+        {
+            double timeInSeconds = (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+            int unityLaunchTimeInSeconds = (int)(timeInSeconds - EditorApplication.timeSinceStartup);
+            int prevUnityLaunchTime = EditorPrefs.GetInt("VSCode_UnityLaunchTime", 0);
+            // If launch time has changed, then Unity was re-opened 
+            if (unityLaunchTimeInSeconds > prevUnityLaunchTime) {
+                // Launch VSCode
+                VSCode.MenuOpenProject();
+                // Save new launch time
+                EditorPrefs.SetInt("VSCode_UnityLaunchTime", unityLaunchTimeInSeconds);
+            }
+        }
+
+        static void Update() {
+
         }
 
         /// <summary>

@@ -1147,13 +1147,13 @@ namespace dotBunny.Unity
                 EditorPrefs.SetString("kScriptsDefaultApp", CodePath);
 
                 // Arguments
-                if (EditorPrefs.GetString("kScriptEditorArgs") != "-r -g \"$(File):$(Line)\"")
+                if (EditorPrefs.GetString("kScriptEditorArgs") != "-r -g `$(File):$(Line)`")
                 {
                     EditorPrefs.SetString("VSCode_PreviousArgs", EditorPrefs.GetString("kScriptEditorArgs"));
                 }
 
-                EditorPrefs.SetString("kScriptEditorArgs", "-r -g \"$(File):$(Line)\"");
-                EditorPrefs.SetString("kScriptEditorArgs" + CodePath, "-r -g \"$(File):$(Line)\"");
+                EditorPrefs.SetString("kScriptEditorArgs", "-r -g `$(File):$(Line)`");
+                EditorPrefs.SetString("kScriptEditorArgs" + CodePath, "-r -g `$(File):$(Line)`");
 
 
                 // MonoDevelop Solution

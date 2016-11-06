@@ -33,7 +33,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Additional File Extensions
         /// </summary>
-        public const string FileExtensions = ".ts, .bjs";
+        public const string FileExtensions = ".ts, .bjs, .javascript";
         
         /// <summary>
         /// Download URL for Unity Debbuger
@@ -1258,7 +1258,13 @@ namespace dotBunny.Unity
             }
 
             string exclusions =
+                // Associations
                 "{\n" +
+                "\t\"files.associations\":\n" +
+                "\t{\n" +
+                "\t\t\"*.bjs\":\"javascript\",\n" +
+                "\t\t\"*.javascript\":\"javascript\"\n" +
+                "\t},\n" +
                 "\t\"files.exclude\":\n" +
                 "\t{\n" +
                 // Hidden Files

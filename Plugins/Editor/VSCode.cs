@@ -33,7 +33,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Additional File Extensions
         /// </summary>
-        public const string FileExtensions = ".ts, .bjs, .javascript";
+        public const string FileExtensions = ".ts, .bjs, .javascript, .json, .html";
         
         /// <summary>
         /// Download URL for Unity Debbuger

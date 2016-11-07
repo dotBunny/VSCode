@@ -21,7 +21,7 @@ A UAS packaged version of the plugin is [available](http://u3d.as/jmM) for your 
 ### Usage
 Once the VSCode file is in place, simply navigate your way to the `Unity Preferences` and select `VSCode` and check the `Enable Integration` option.
 
-That's it! Your ready to go!
+That's it! You're ready to go!
 
 OK, so maybe some people need a little video explaining some of the finer details of how to use the plugin. So I shot a [quick video](https://vimeo.com/dotbunny/vscode) that highlights the ups and the downs (like Unity hanging after debugging sometimes) for people to watch. Please note this video is from a previous version of the plugin where things are in the menu, this has changed since then.
 

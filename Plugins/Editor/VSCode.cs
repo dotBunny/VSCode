@@ -31,6 +31,11 @@ namespace dotBunny.Unity
         public const string VersionCode = "-RELEASE";
         
         /// <summary>
+        /// Additional File Extensions
+        /// </summary>
+        public const string FileExtensions = ".ts, .bjs, .javascript";
+        
+        /// <summary>
         /// Download URL for Unity Debbuger
         /// </summary>
         public const string UnityDebuggerURL = "https://unity.gallery.vsassets.io/_apis/public/gallery/publisher/unity/extension/unity-debug/latest/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage";
@@ -921,8 +926,20 @@ namespace dotBunny.Unity
             // determine asset that has been double clicked in the project view
             UnityEngine.Object selected = EditorUtility.InstanceIDToObject(instanceID);
 
+            // additional file extensions
+            string selectedFilePath = AssetDatabase.GetAssetPath(selected);
+            string selectedFileExt = Path.GetExtension(selectedFilePath);
+            if (selectedFileExt == null) {
+                selectedFileExt = String.Empty;
+            }
+            if (!String.IsNullOrEmpty(selectedFileExt)) {
+                selectedFileExt = selectedFileExt.ToLower();
+            }
+
+            // open supported object types
             if (selected.GetType().ToString() == "UnityEditor.MonoScript" ||
-                selected.GetType().ToString() == "UnityEngine.Shader")
+                selected.GetType().ToString() == "UnityEngine.Shader" ||
+                VSCode.FileExtensions.IndexOf(selectedFileExt, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 string completeFilepath = appPath + Path.DirectorySeparatorChar + AssetDatabase.GetAssetPath(selected);
 
@@ -1241,7 +1258,13 @@ namespace dotBunny.Unity
             }
 
             string exclusions =
+                // Associations
                 "{\n" +
+                "\t\"files.associations\":\n" +
+                "\t{\n" +
+                "\t\t\"*.bjs\":\"javascript\",\n" +
+                "\t\t\"*.javascript\":\"javascript\"\n" +
+                "\t},\n" +
                 "\t\"files.exclude\":\n" +
                 "\t{\n" +
                 // Hidden Files
@@ -1266,10 +1289,15 @@ namespace dotBunny.Unity
                 // Media Files
                 "\t\t\"**/*.pdf\":true,\n" +
 
+                // Video
+                "\t\t\"**/*.mp4\":true,\n" +
+
                 // Audio
                 "\t\t\"**/*.mid\":true,\n" +
                 "\t\t\"**/*.midi\":true,\n" +
                 "\t\t\"**/*.wav\":true,\n" +
+                "\t\t\"**/*.mp3\":true,\n" +
+                "\t\t\"**/*.ogg\":true,\n" +
 
                 // Textures
                 "\t\t\"**/*.gif\":true,\n" +
@@ -1281,6 +1309,8 @@ namespace dotBunny.Unity
                 "\t\t\"**/*.tga\":true,\n" +
                 "\t\t\"**/*.tif\":true,\n" +
                 "\t\t\"**/*.tiff\":true,\n" +
+                "\t\t\"**/*.hdr\":true,\n" +
+                "\t\t\"**/*.exr\":true,\n" +
 
                 // Models
                 "\t\t\"**/*.3ds\":true,\n" +
@@ -1308,6 +1338,8 @@ namespace dotBunny.Unity
                 "\t\t\"Build/\":true,\n" +
                 "\t\t\"Library/\":true,\n" +
                 "\t\t\"library/\":true,\n" +
+                "\t\t\"Project/\":true,\n" +
+                "\t\t\"project/\":true,\n" +
                 "\t\t\"obj/\":true,\n" +
                 "\t\t\"Obj/\":true,\n" +
                 "\t\t\"ProjectSettings/\":true,\r" +

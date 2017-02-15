@@ -1275,6 +1275,10 @@ namespace dotBunny.Unity
                 "\t\t\"**/.gitmodules\":true,\n" +
                 "\t\t\"**/.svn\":true,\n" +
 
+                // Compressed Files
+                "\t\t\"**/*.zip\":true,\n" +
+                "\t\t\"**/*.gz\":true,\n" +
+                "\t\t\"**/*.7z\":true,\n" +
 
                 // Project Files
                 "\t\t\"**/*.booproj\":true,\n" +
@@ -1332,6 +1336,8 @@ namespace dotBunny.Unity
                 "\t\t\"**/*.meta\":true,\n" +
                 "\t\t\"**/*.prefab\":true,\n" +
                 "\t\t\"**/*.unity\":true,\n" +
+                "\t\t\"**/*.anim\":true,\n" +
+                "\t\t\"**/*.controller\":true,\n" +
 
                 // Folders
                 "\t\t\"build/\":true,\n" +

@@ -4,7 +4,7 @@
  * Seamless support for Microsoft Visual Studio Code in Unity
  *
  * Version:
- *   2.7
+ *   2.8
  *
  * Authors:
  *   Matthew Davey <matthew.davey@dotbunny.com>
@@ -23,7 +23,7 @@ namespace dotBunny.Unity
         /// <summary>
         /// Current Version Number
         /// </summary>
-        public const float Version = 2.7f;
+        public const float Version = 2.8f;
 
         /// <summary>
         /// Current Version Code

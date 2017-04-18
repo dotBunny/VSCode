@@ -5,10 +5,10 @@
 ##### Unity > 4.5 && Unity < 5.5
 I am not sure exactly where in the 4.x cycle some of the features I'm using were introduced, but I'm guessing its around the 4.5+ mark. I've checked with the latest 4.5.0f6 release. Unity has also committed to having full support for Code when Unity 5.5 drops. So at that point all bets are off for the usefulness of this plugin. Like our MonoDevelop.Unity plugin of past, Unity catches up eventually.
 
-#####Visual Studio Code 0.10.1+
+##### Visual Studio Code 0.10.1+
 Get the [latest version](https://code.visualstudio.com), or have a look at the past releases of the VSCode [plugin](https://github.com/dotBunny/VSCode/releases/tag/1.6.5) for support for your version.
 
-######Mono
+###### Mono
 A good number of people have needed to install Mono in order for many of the issues with OmniSharp to be resolved.
 I would suggest installing the latest package available at the [Mono Project](http://www.mono-project.com/download/). Don't worry it will not mess with Unity.
 

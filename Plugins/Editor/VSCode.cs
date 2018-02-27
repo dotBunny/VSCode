@@ -419,7 +419,8 @@ namespace dotBunny.Unity
             {
                 "/usr/bin/code",
                 "/bin/code",
-                "/usr/local/bin/code"
+                "/usr/local/bin/code",
+                "/var/lib/flatpak/exports/bin/com.visualstudio.code"
             };
 #endif
             for(int i = 0; i < possiblePaths.Length; i++)

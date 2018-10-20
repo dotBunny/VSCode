@@ -40,6 +40,9 @@ namespace dotBunny.Unity
         /// </summary>
         public const string UnityDebuggerURL = "https://unity.gallery.vsassets.io/_apis/public/gallery/publisher/unity/extension/unity-debug/latest/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage";
 
+        // Used to keep Unity from crashing when the editor is quit
+        static bool alreadyFixedPreferences;
+
         #region Properties
 
         /// <summary>
@@ -1233,10 +1236,13 @@ namespace dotBunny.Unity
                 // Always leave editor attaching on, I know, it solves the problem of needing to restart for this
                 // to actually work
                 EditorPrefs.SetBool("AllowAttachedDebuggingOfEditor", true);
-                
             }
 
-            FixUnityPreferences();
+            if (!alreadyFixedPreferences)
+            {
+                alreadyFixedPreferences = true;
+                FixUnityPreferences();
+            }
         }
 
         /// <summary>

@@ -73,15 +73,18 @@ namespace dotBunny.Unity
         /// </summary>
         /// <returns>The platforms "Program Files" path.</returns>
         static string ProgramFilesx86()
-		{
-			if( 8 == IntPtr.Size 
-				|| (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("PROCESSOR_ARCHITEW6432"))))
-			{
-				return Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-			}
+        {
+            return Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+        }
 
-			return Environment.GetEnvironmentVariable("ProgramFiles");
-		}
+        /// <summary>
+        /// Get Program Files Path
+        /// </summary>
+        /// <returns>The platforms "Program Files" path.</returns>
+        static string ProgramFiles()
+        {
+            return Environment.GetEnvironmentVariable("ProgramFiles");
+        }
 		
         
         /// <summary>
@@ -413,6 +416,10 @@ namespace dotBunny.Unity
             };
 #elif UNITY_EDITOR_WIN
             {
+                ProgramFiles() + Path.DirectorySeparatorChar + "Microsoft VS Code"
+                + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd",
+                ProgramFiles() + Path.DirectorySeparatorChar + "Microsoft VS Code Insiders"
+                + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code-insiders.cmd",
                 ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code"
                 + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "code.cmd",
                 ProgramFilesx86() + Path.DirectorySeparatorChar + "Microsoft VS Code Insiders"

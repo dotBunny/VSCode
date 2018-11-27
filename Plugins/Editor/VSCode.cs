@@ -907,6 +907,7 @@ namespace dotBunny.Unity
                 }
             }
 
+            EditorGUILayout.EndVertical();
         }
 
         /// <summary>

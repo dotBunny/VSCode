@@ -428,9 +428,12 @@ namespace dotBunny.Unity
 #else
             {
                 "/usr/bin/code",
+                "/usr/bin/code-insiders",
                 "/bin/code",
                 "/usr/local/bin/code",
-                "/var/lib/flatpak/exports/bin/com.visualstudio.code"
+                "/var/lib/flatpak/exports/bin/com.visualstudio.code",
+                "/snap/bin/code",
+                "/snap/bin/code-insiders"
             };
 #endif
             for(int i = 0; i < possiblePaths.Length; i++)

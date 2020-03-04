@@ -242,13 +242,44 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
-        /// The full path to the project
+        /// Should the parent of the unity project be used as the workspace directory.
         /// </summary>
-        static string ProjectPath
+        /// <remarks>
+        /// Usefull if you have your unity project as a sub-directory.
+        /// </remarks>
+        static bool UseParentWorkspace
+        {
+            get
+            {
+                return EditorPrefs.GetBool("VSCode_UseParentWorkspace", false);
+            }
+            set
+            {
+                EditorPrefs.SetBool("VSCode_UseParentWorkspace", value);
+            }
+        }
+
+        /// <summary>
+        /// The full path to the Unity project.
+        /// </summary>
+        static string UnityProjectPath
         {
             get
             {
                 return System.IO.Path.GetDirectoryName(UnityEngine.Application.dataPath);
+            }
+        }
+        
+        /// <summary>
+        /// The full path to the workspace.
+        /// </summary>
+        static string WorkspacePath
+        {
+            get
+            {
+                return UseParentWorkspace ? 
+                    Directory.GetParent(UnityProjectPath).FullName : 
+                    UnityProjectPath;
             }
         }
 
@@ -277,7 +308,7 @@ namespace dotBunny.Unity
         {
             get
             {
-                return ProjectPath + System.IO.Path.DirectorySeparatorChar + ".vscode";
+                return WorkspacePath + System.IO.Path.DirectorySeparatorChar + ".vscode";
             }
         }
 
@@ -790,7 +821,7 @@ namespace dotBunny.Unity
             SyncSolution();
 
             // Load Project
-            CallVSCode("\"" + ProjectPath + "\"");
+            CallVSCode("\"" + WorkspacePath + "\"");
         }
 
         /// <summary>
@@ -860,6 +891,9 @@ namespace dotBunny.Unity
             EditorGUILayout.Space();
             RevertExternalScriptEditorOnExit = EditorGUILayout.Toggle(new GUIContent("Revert Script Editor On Unload", "Should the external script editor setting be reverted to its previous setting on project unload? This is useful if you do not use Code with all your projects."),RevertExternalScriptEditorOnExit);
             
+            EditorGUILayout.Space();
+            UseParentWorkspace = EditorGUILayout.Toggle(new GUIContent("Parent as workspace", "Should the parent of the project be used as the workspace directory? Usefull if you have the Unity project in a subdirectory."),UseParentWorkspace);
+
             Debug = EditorGUILayout.Toggle(new GUIContent("Output Messages To Console", "Should informational messages be sent to Unity's Console?"), Debug);
 
             WriteLaunchFile = EditorGUILayout.Toggle(new GUIContent("Always Write Launch File", "Always write the launch.json settings when entering play mode?"), WriteLaunchFile);
@@ -936,7 +970,7 @@ namespace dotBunny.Unity
             }
 
             // current path without the asset folder
-            string appPath = ProjectPath;
+            string appPath = UnityProjectPath;
 
             // determine asset that has been double clicked in the project view
             UnityEngine.Object selected = EditorUtility.InstanceIDToObject(instanceID);
@@ -961,11 +995,11 @@ namespace dotBunny.Unity
                 string args = null;
                 if (line == -1)
                 {
-                    args = "\"" + ProjectPath + "\" \"" + completeFilepath + "\" -r";
+                    args = "\"" + WorkspacePath + "\" \"" + completeFilepath + "\" -r";
                 }
                 else
                 {
-                    args = "\"" + ProjectPath + "\" -g \"" + completeFilepath + ":" + line.ToString() + "\" -r";
+                    args = "\"" + WorkspacePath + "\" -g \"" + completeFilepath + ":" + line.ToString() + "\" -r";
                 }
                 // call 'open'
                 CallVSCode(args);

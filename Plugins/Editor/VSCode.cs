@@ -840,118 +840,126 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
-        /// VS Code Integration Preferences Item
+        /// VS Code Integration Settings Provider
         /// </summary>
         /// <remarks>
         /// Contains all 3 toggles: Enable/Disable; Debug On/Off; Writing Launch File On/Off
         /// </remarks>
-        [PreferenceItem("VSCode")]
-        static void VSCodePreferencesItem()
+        [SettingsProvider]
+        static SettingsProvider VSCodeSettingsProvider()
         {
-            if (EditorApplication.isCompiling)
+            var provider = new SettingsProvider("VSCode", SettingsScope.User)
             {
-                EditorGUILayout.HelpBox("Please wait for Unity to finish compiling. \nIf the window doesn't refresh, simply click on the window or move it around to cause a repaint to happen.", MessageType.Warning);
-                return;
-            }
-            EditorGUILayout.BeginVertical();
+                label = "VSCode",
+                guiHandler = (searchContext) =>
+                {
+                    if (EditorApplication.isCompiling)
+                    {
+                        EditorGUILayout.HelpBox("Please wait for Unity to finish compiling. \nIf the window doesn't refresh, simply click on the window or move it around to cause a repaint to happen.", MessageType.Warning);
+                        return;
+                    }
+                    EditorGUILayout.BeginVertical();
 
-            var developmentInfo = "Support development of this plugin, follow @reapazor and @dotbunny on Twitter.";
-            var versionInfo = string.Format("{0:0.00}", Version) + VersionCode + ", GitHub version @ " + string.Format("{0:0.00}", GitHubVersion);
-            EditorGUILayout.HelpBox(developmentInfo + " --- [ " + versionInfo + " ]", MessageType.None);
+                    var developmentInfo = "Support development of this plugin, follow @reapazor and @dotbunny on Twitter.";
+                    var versionInfo = string.Format("{0:0.00}", Version) + VersionCode + ", GitHub version @ " + string.Format("{0:0.00}", GitHubVersion);
+                    EditorGUILayout.HelpBox(developmentInfo + " --- [ " + versionInfo + " ]", MessageType.None);
 
-            EditorGUI.BeginChangeCheck();
-            
-// Need the VS Code executable
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("VS Code Path", GUILayout.Width(75));
-#if UNITY_5_3_OR_NEWER            
-            CodePath = EditorGUILayout.DelayedTextField(CodePath,  GUILayout.ExpandWidth(true));
+                    EditorGUI.BeginChangeCheck();
+
+                    // Need the VS Code executable
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("VS Code Path", GUILayout.Width(75));
+#if UNITY_5_3_OR_NEWER
+                    CodePath = EditorGUILayout.DelayedTextField(CodePath,  GUILayout.ExpandWidth(true));
 #else
-            CodePath = EditorGUILayout.TextField(CodePath,  GUILayout.ExpandWidth(true));
-#endif        
-            GUI.SetNextControlName("PathSetButton");    
-            if(GUILayout.Button("...", GUILayout.Height(14), GUILayout.Width(20)))
-            {
-                GUI.FocusControl("PathSetButton");
-                string path = EditorUtility.OpenFilePanel( "Visual Studio Code Executable", "", "" );
-                if( path.Length != 0 && File.Exists(path) || Directory.Exists(path))
-                {
-                    CodePath = path;
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space();
-
-            Enabled = EditorGUILayout.Toggle(new GUIContent("Enable Integration", "Should the integration work its magic for you?"), Enabled);
-
-            UseUnityDebugger = EditorGUILayout.Toggle(new GUIContent("Use Unity Debugger", "Should the integration integrate with Unity's VSCode Extension (must be installed)."), UseUnityDebugger);
-
-            AutoOpenEnabled = EditorGUILayout.Toggle(new GUIContent("Enable Auto Open", "When opening a project in Unity, should it automatically open in VS Code?"), AutoOpenEnabled);
-
-            EditorGUILayout.Space();
-            RevertExternalScriptEditorOnExit = EditorGUILayout.Toggle(new GUIContent("Revert Script Editor On Unload", "Should the external script editor setting be reverted to its previous setting on project unload? This is useful if you do not use Code with all your projects."),RevertExternalScriptEditorOnExit);
-            
-            EditorGUILayout.Space();
-            UseParentWorkspace = EditorGUILayout.Toggle(new GUIContent("Parent as workspace", "Should the parent of the project be used as the workspace directory? Usefull if you have the Unity project in a subdirectory."),UseParentWorkspace);
-
-            Debug = EditorGUILayout.Toggle(new GUIContent("Output Messages To Console", "Should informational messages be sent to Unity's Console?"), Debug);
-
-            WriteLaunchFile = EditorGUILayout.Toggle(new GUIContent("Always Write Launch File", "Always write the launch.json settings when entering play mode?"), WriteLaunchFile);
-
-            EditorGUILayout.Space();
-
-            AutomaticUpdates = EditorGUILayout.Toggle(new GUIContent("Automatic Updates", "Should the plugin automatically update itself?"), AutomaticUpdates);
-
-            UpdateTime = EditorGUILayout.IntSlider(new GUIContent("Update Timer (Days)", "After how many days should updates be checked for?"), UpdateTime, 1, 31);
-
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                UpdateUnityPreferences(Enabled);
-
-                // TODO: Force Unity To Reload Preferences
-                // This seems to be a hick up / issue
-                if (VSCode.Debug)
-                {
-                    if (Enabled)
+                    CodePath = EditorGUILayout.TextField(CodePath, GUILayout.ExpandWidth(true));
+#endif
+                    GUI.SetNextControlName("PathSetButton");
+                    if (GUILayout.Button("...", GUILayout.Height(14), GUILayout.Width(20)))
                     {
-                        UnityEngine.Debug.Log("[VSCode] Integration Enabled");
+                        GUI.FocusControl("PathSetButton");
+                        string path = EditorUtility.OpenFilePanel("Visual Studio Code Executable", "", "");
+                        if (path.Length != 0 && File.Exists(path) || Directory.Exists(path))
+                        {
+                            CodePath = path;
+                        }
                     }
-                    else
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.Space();
+
+                    Enabled = EditorGUILayout.Toggle(new GUIContent("Enable Integration", "Should the integration work its magic for you?"), Enabled);
+
+                    UseUnityDebugger = EditorGUILayout.Toggle(new GUIContent("Use Unity Debugger", "Should the integration integrate with Unity's VSCode Extension (must be installed)."), UseUnityDebugger);
+
+                    AutoOpenEnabled = EditorGUILayout.Toggle(new GUIContent("Enable Auto Open", "When opening a project in Unity, should it automatically open in VS Code?"), AutoOpenEnabled);
+
+                    EditorGUILayout.Space();
+                    RevertExternalScriptEditorOnExit = EditorGUILayout.Toggle(new GUIContent("Revert Script Editor On Unload", "Should the external script editor setting be reverted to its previous setting on project unload? This is useful if you do not use Code with all your projects."), RevertExternalScriptEditorOnExit);
+
+                    EditorGUILayout.Space();
+                    UseParentWorkspace = EditorGUILayout.Toggle(new GUIContent("Parent as workspace", "Should the parent of the project be used as the workspace directory? Usefull if you have the Unity project in a subdirectory."), UseParentWorkspace);
+
+                    Debug = EditorGUILayout.Toggle(new GUIContent("Output Messages To Console", "Should informational messages be sent to Unity's Console?"), Debug);
+
+                    WriteLaunchFile = EditorGUILayout.Toggle(new GUIContent("Always Write Launch File", "Always write the launch.json settings when entering play mode?"), WriteLaunchFile);
+
+                    EditorGUILayout.Space();
+
+                    AutomaticUpdates = EditorGUILayout.Toggle(new GUIContent("Automatic Updates", "Should the plugin automatically update itself?"), AutomaticUpdates);
+
+                    UpdateTime = EditorGUILayout.IntSlider(new GUIContent("Update Timer (Days)", "After how many days should updates be checked for?"), UpdateTime, 1, 31);
+
+                    EditorGUILayout.Space();
+                    EditorGUILayout.Space();
+
+                    if (EditorGUI.EndChangeCheck())
                     {
-                        UnityEngine.Debug.Log("[VSCode] Integration Disabled");
+                        UpdateUnityPreferences(Enabled);
+
+                        // TODO: Force Unity To Reload Preferences
+                        // This seems to be a hick up / issue
+                        if (VSCode.Debug)
+                        {
+                            if (Enabled)
+                            {
+                                UnityEngine.Debug.Log("[VSCode] Integration Enabled");
+                            }
+                            else
+                            {
+                                UnityEngine.Debug.Log("[VSCode] Integration Disabled");
+                            }
+                        }
                     }
-                }
-            }
 
-            if (GUILayout.Button(new GUIContent("Force Update", "Check for updates to the plugin, right NOW!")))
-            {
-                CheckForUpdate();
-                EditorGUILayout.EndVertical();
-                return;
-            }
-            if (GUILayout.Button(new GUIContent("Write Workspace Settings", "Output a default set of workspace settings for VSCode to use, ignoring many different types of files.")))
-            {
-                WriteWorkspaceSettings();
-                EditorGUILayout.EndVertical();
-                return;
-            }
-            EditorGUILayout.Space();
+                    if (GUILayout.Button(new GUIContent("Force Update", "Check for updates to the plugin, right NOW!")))
+                    {
+                        CheckForUpdate();
+                        EditorGUILayout.EndVertical();
+                        return;
+                    }
+                    if (GUILayout.Button(new GUIContent("Write Workspace Settings", "Output a default set of workspace settings for VSCode to use, ignoring many different types of files.")))
+                    {
+                        WriteWorkspaceSettings();
+                        EditorGUILayout.EndVertical();
+                        return;
+                    }
+                    EditorGUILayout.Space();
 
-            if (UseUnityDebugger)
-            {
-                EditorGUILayout.HelpBox("In order for the \"Use Unity Debuggger\" option to function above, you need to have installed the Unity Debugger Extension for Visual Studio Code.", MessageType.Warning);
-                if (GUILayout.Button(new GUIContent("Install Unity Debugger", "Install the Unity Debugger Extension into Code")))
-                {
-                    InstallUnityDebugger();
+                    if (UseUnityDebugger)
+                    {
+                        EditorGUILayout.HelpBox("In order for the \"Use Unity Debuggger\" option to function above, you need to have installed the Unity Debugger Extension for Visual Studio Code.", MessageType.Warning);
+                        if (GUILayout.Button(new GUIContent("Install Unity Debugger", "Install the Unity Debugger Extension into Code")))
+                        {
+                            InstallUnityDebugger();
+                            EditorGUILayout.EndVertical();
+                            return;
+                        }
+                    }
+
                     EditorGUILayout.EndVertical();
-                    return;
                 }
-            }
-
-            EditorGUILayout.EndVertical();
+            };
+            return provider;
         }
 
         /// <summary>

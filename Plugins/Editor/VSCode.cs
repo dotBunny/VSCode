@@ -1064,6 +1064,26 @@ namespace dotBunny.Unity
         }
 
         /// <summary>
+        /// Returns language version of curront Unity version
+        /// </summary>
+        static string GetLanguageVersion()
+        {
+#if UNITY_2021_3_OR_NEWER
+            return "default";
+#elif UNITY_2021_2_OR_NEWER
+            return "9.0";
+#elif UNITY_2020_2_OR_NEWER
+            return "8.0";
+#elif UNITY_2018_3_OR_NEWER
+            return "7.3";
+#elif UNITY_2017_1_OR_NEWER
+            return "6";
+#else
+            return "default";
+#endif
+        }
+
+        /// <summary>
         /// Remove extra/erroneous data from project file (content).
         /// </summary>
         static string ScrubProjectContent(string content)
@@ -1080,7 +1100,7 @@ namespace dotBunny.Unity
 #endif
 
             string targetPath = "";// "<TargetPath>Temp" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "Debug" + Path.DirectorySeparatorChar + "</TargetPath>"; //OutputPath
-            string langVersion = "<LangVersion>default</LangVersion>";
+            string langVersion = $"<LangVersion>{GetLanguageVersion()}</LangVersion>";
 
 
             bool found = true;
